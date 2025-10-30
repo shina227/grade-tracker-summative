@@ -18,7 +18,7 @@ const AuthLayout = ({ children }) => {
           <StatsInfoCard
             icon={<LuTrendingUpDown />}
             label="Track Your Grades & Assignments"
-            value="100%"
+            text="A+"
             color="bg-indigo-600"
           />
         </div>
@@ -34,7 +34,7 @@ const AuthLayout = ({ children }) => {
 
 export default AuthLayout;
 
-const StatsInfoCard = ({ icon, label, value, color }) => {
+const StatsInfoCard = ({ icon, label, text, color }) => {
   return (
     <div className="flex gap-6 bg-white p-4 rounded-xl shadow-md shadow-indigo-400/10 border border-gray-200/50 z-30">
       <div
@@ -42,9 +42,9 @@ const StatsInfoCard = ({ icon, label, value, color }) => {
       >
         {icon}
       </div>
-      <div>
-        <h6 className="text-[13px] text-gray-500 mb-1">{label}</h6>
-        <span className="text-[17px]">{value}</span>
+      <div className="flex flex-col justify-center">
+        <h6 className="text-[13px] text-gray-500">{label}</h6>
+        <p className="text-lg text-gray-700">{text}</p>
       </div>
     </div>
   );
