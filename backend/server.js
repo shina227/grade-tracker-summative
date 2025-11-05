@@ -7,18 +7,20 @@ const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
+// Connect to database
+connectDB();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Middleware to handle CORS
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "*",
-    methods: ["GET", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-app.use(express.json());
-
-connectDB();
 
 app.use("/api/v1/auth", authRoutes);
 
