@@ -5,6 +5,7 @@ const path = require("path");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const coursesRoutes = require("./routes/coursesRoutes");
+const assignmentsRoutes = require("./routes/assignmentsRoutes");
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use(
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/courses", coursesRoutes);
+app.use("/api/v1/assignments", assignmentsRoutes);
 
 // Serve uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
