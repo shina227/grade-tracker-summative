@@ -11,6 +11,7 @@ import Home from "./pages/Dashboard/Home";
 import Courses from "./pages/Dashboard/Courses";
 import Assignments from "./pages/Dashboard/Assignments";
 import Grades from "./pages/Dashboard/Grades";
+import UserProvider from "./context/userContext";
 
 const Root = () => {
   // Check if token exists in localStorage
@@ -26,19 +27,21 @@ const Root = () => {
 
 const App = () => {
   return (
-    <div>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Root />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signUp" element={<SignUp />} />
-          <Route path="/dashboard" element={<Home />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/assignments" element={<Assignments />} />
-          <Route path="/grades" element={<Grades />} />
-        </Routes>
-      </Router>
-    </div>
+    <UserProvider>
+      <div>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Root />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signUp" element={<SignUp />} />
+            <Route path="/dashboard" element={<Home />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/assignments" element={<Assignments />} />
+            <Route path="/grades" element={<Grades />} />
+          </Routes>
+        </Router>
+      </div>
+    </UserProvider>
   );
 };
 

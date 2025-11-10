@@ -7,6 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const coursesRoutes = require("./routes/coursesRoutes");
 const assignmentsRoutes = require("./routes/assignmentsRoutes");
 const gradesRoutes = require("./routes/gradesRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/courses", coursesRoutes);
 app.use("/api/v1/assignments", assignmentsRoutes);
 app.use("/api/v1/grades", gradesRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
 
 // Serve uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
