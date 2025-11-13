@@ -3,7 +3,6 @@ import {
   LuBookOpen, // Courses
   LuClipboardList, // Assignments
   LuGraduationCap, // Grades
-  LuChartBar, // Reports
   LuBell, // Notifications
   LuLogOut,
 } from "react-icons/lu";
@@ -32,12 +31,6 @@ export const SIDE_MENU_DATA = [
     label: "Grades",
     icon: LuGraduationCap,
     path: "/grades",
-  },
-  {
-    id: "05",
-    label: "Reports",
-    icon: LuChartBar,
-    path: "/reports",
   },
   {
     id: "06",
