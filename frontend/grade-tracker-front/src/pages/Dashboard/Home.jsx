@@ -6,6 +6,7 @@ import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { InfoCard } from "../../components/Cards/InfoCard";
 import UpcomingAssignments from "../../components/Dashboard/UpcomingAssignments";
+import AssignmentsOverview from "../../components/Dashboard/AssignmentsOverview";
 
 import { LuClipboardList, LuBookOpen, LuGraduationCap } from "react-icons/lu";
 import { IoMdCard } from "react-icons/io";
@@ -73,6 +74,23 @@ const Home = () => {
           <UpcomingAssignments
             assignments={dashboardData?.UpcomingAssignments}
             onSeeMore={() => navigate("/Assignments")}
+          />
+
+          <AssignmentsOverview
+            data={[
+              {
+                name: "Completed",
+                value: dashboardData?.completedAssignments || 0,
+              },
+              {
+                name: "Pending",
+                value: dashboardData?.pendingAssignments || 0,
+              },
+              {
+                name: "Overdue",
+                value: dashboardData?.overdueAssignments || 0,
+              },
+            ]}
           />
         </div>
       </div>
