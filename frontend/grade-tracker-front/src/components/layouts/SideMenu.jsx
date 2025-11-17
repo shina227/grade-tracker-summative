@@ -25,7 +25,7 @@ const SideMenu = ({ activeMenu }) => {
   };
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200/50 p-5 sticky top-[61px] z-40 overflow-y-auto">
+    <div className="w-64 bg-white border-r border-gray-200/50 p-5 sticky top-[61px] z-40">
       <div className="flex flex-col items-center justify-center gap-3 mt-3 mb-7">
         {user?.profileImageUrl ? (
           <img

@@ -8,6 +8,12 @@ const AssignmentsOverview = ({
   pendingAssignments,
   overdueAssignments,
 }) => {
+  console.log("Chart data:", {
+    completedAssignments,
+    pendingAssignments,
+    overdueAssignments,
+  });
+
   const chartData = [
     { name: "Completed", value: completedAssignments },
     { name: "Pending", value: pendingAssignments },

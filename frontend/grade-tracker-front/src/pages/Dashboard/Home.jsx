@@ -7,6 +7,7 @@ import { API_PATHS } from "../../utils/apiPaths";
 import { InfoCard } from "../../components/Cards/InfoCard";
 import UpcomingAssignments from "../../components/Dashboard/UpcomingAssignments";
 import AssignmentsOverview from "../../components/Dashboard/AssignmentsOverview";
+import AssignmentDetails from "../../components/Dashboard/AssignmentDetails";
 
 import { LuClipboardList, LuBookOpen, LuGraduationCap } from "react-icons/lu";
 import { IoMdCard } from "react-icons/io";
@@ -69,28 +70,24 @@ const Home = () => {
           />
         </div>
 
-        {/* Upcoming Assignments */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          {/* Upcoming Assignments List */}
           <UpcomingAssignments
             assignments={dashboardData?.UpcomingAssignments}
             onSeeMore={() => navigate("/Assignments")}
           />
 
+          {/* Assignments Overview Chart */}
           <AssignmentsOverview
-            data={[
-              {
-                name: "Completed",
-                value: dashboardData?.completedAssignments || 0,
-              },
-              {
-                name: "Pending",
-                value: dashboardData?.pendingAssignments || 0,
-              },
-              {
-                name: "Overdue",
-                value: dashboardData?.overdueAssignments || 0,
-              },
-            ]}
+            completedAssignments={dashboardData?.completedAssignments || 0}
+            pendingAssignments={dashboardData?.pendingAssignments || 0}
+            overdueAssignments={dashboardData?.overdueAssignments || 0}
+          />
+
+          {/* Assignment Details*/}
+          <AssignmentDetails
+            assignments={dashboardData?.last30DaysAssignments?.assignments}
+            onSeeMore={() => navigate("/assignments")}
           />
         </div>
       </div>

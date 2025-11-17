@@ -30,7 +30,7 @@ exports.getDashboardData = async (req, res) => {
       status: "In Progress",
     });
 
-    // Assignments due within the next 30 days
+    // Upcoming assignments (next 30 days)
     const now = new Date();
     const next30Days = new Date();
     next30Days.setDate(now.getDate() + 30);
@@ -40,6 +40,18 @@ exports.getDashboardData = async (req, res) => {
       dueDate: { $gte: now, $lte: next30Days },
     }).sort({ dueDate: 1 });
 
+    // Completed, Pending, Overdue assignment counts
+    const allAssignments = await Assignment.find({ userId });
+    const completedAssignments = allAssignments.filter(
+      (a) => a.status === "Completed"
+    ).length;
+    const pendingAssignments = allAssignments.filter(
+      (a) => a.status === "Pending"
+    ).length;
+    const overdueAssignments = allAssignments.filter(
+      (a) => a.status !== "Completed" && a.dueDate && a.dueDate < now
+    ).length;
+
     // Final dashboard summary
     res.status(200).json({
       totalCourses,
@@ -48,6 +60,9 @@ exports.getDashboardData = async (req, res) => {
       completedCourses,
       inProgressCourses,
       upcomingAssignments,
+      completedAssignments,
+      pendingAssignments,
+      overdueAssignments,
     });
   } catch (error) {
     console.error("Error getting dashboard data:", error);

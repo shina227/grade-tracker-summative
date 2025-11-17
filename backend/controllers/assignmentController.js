@@ -23,6 +23,7 @@ exports.addAssignment = async (req, res) => {
       description,
       dueDate,
       weight,
+      userId: req.user.id,
     });
 
     await assignment.save();
@@ -43,7 +44,7 @@ exports.getAllAssignments = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const assignments = await Assignments.find({ userId }).sort({
+    const assignments = await Assignment.find({ userId }).sort({
       createdAt: -1,
     });
     res.json(assignments);
