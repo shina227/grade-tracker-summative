@@ -17,3 +17,13 @@ export const getInitials = (name) => {
 
   return initials.toUpperCase();
 };
+
+// Prepare Data for Grades Over Time Bar Chart
+export const prepareGradesBarChartData = (grades = []) => {
+  if (!Array.isArray(grades)) return [];
+
+  return grades.map((item) => ({
+    date: item.date, // x-axis
+    grade: Number(item.grade) || 0, // y-axis
+  }));
+};

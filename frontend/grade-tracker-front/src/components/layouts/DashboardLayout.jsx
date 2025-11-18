@@ -8,16 +8,16 @@ const DashboardLayout = ({ children, activeMenu }) => {
   const { user } = useContext(UserContext);
 
   return (
-    <div className="">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Navbar activeMenu={activeMenu} />
 
       {user && (
-        <div className="flex h-[calc(100vh-61px)]">
+        <div className="flex flex-1 overflow-hidden">
           <div className="max-[1080px]:hidden">
             <SideMenu activeMenu={activeMenu} />
           </div>
 
-          <div className="grow mx-5 overflow-y-auto">{children}</div>
+          <div className="flex-1 overflow-y-auto mx-5">{children}</div>
         </div>
       )}
     </div>

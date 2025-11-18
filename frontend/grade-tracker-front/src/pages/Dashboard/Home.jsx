@@ -8,6 +8,7 @@ import { InfoCard } from "../../components/Cards/InfoCard";
 import UpcomingAssignments from "../../components/Dashboard/UpcomingAssignments";
 import AssignmentsOverview from "../../components/Dashboard/AssignmentsOverview";
 import AssignmentDetails from "../../components/Dashboard/AssignmentDetails";
+import GradesOverTime from "../../components/Dashboard/GradesOverTime";
 
 import { LuClipboardList, LuBookOpen, LuGraduationCap } from "react-icons/lu";
 import { IoMdCard } from "react-icons/io";
@@ -89,6 +90,11 @@ const Home = () => {
             assignments={dashboardData?.last30DaysAssignments?.assignments}
             onSeeMore={() => navigate("/assignments")}
           />
+
+          {/* Grades Over Time Chart*/}
+          <GradesOverTime data={dashboardData?.last30DaysGrades?.grades} />
+
+          {/* Grade Distribution Chart */}
         </div>
       </div>
     </DashboardLayout>
