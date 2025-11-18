@@ -9,6 +9,8 @@ import UpcomingAssignments from "../../components/Dashboard/UpcomingAssignments"
 import AssignmentsOverview from "../../components/Dashboard/AssignmentsOverview";
 import AssignmentDetails from "../../components/Dashboard/AssignmentDetails";
 import GradesOverTime from "../../components/Dashboard/GradesOverTime";
+import GradesDistribution from "../../components/Dashboard/GradesDistribution";
+import GradesPerCourse from "../../components/Dashboard/GradesPerCourse";
 
 import { LuClipboardList, LuBookOpen, LuGraduationCap } from "react-icons/lu";
 import { IoMdCard } from "react-icons/io";
@@ -95,6 +97,16 @@ const Home = () => {
           <GradesOverTime data={dashboardData?.last30DaysGrades?.grades} />
 
           {/* Grade Distribution Chart */}
+          <GradesDistribution
+            data={dashboardData?.last365DaysGrades?.slice(0, 4) || []}
+            totalGrades={dashboardData?.totalGrades || 0}
+          />
+
+          {/* Grades Per Course */}
+          <GradesPerCourse
+            grades={dashboardData?.last60DaysGrades?.grades}
+            onSeeMore={() => navigate("/grades")}
+          />
         </div>
       </div>
     </DashboardLayout>
