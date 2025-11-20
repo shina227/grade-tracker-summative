@@ -12,6 +12,7 @@ import Courses from "./pages/Dashboard/Courses";
 import Assignments from "./pages/Dashboard/Assignments";
 import Grades from "./pages/Dashboard/Grades";
 import UserProvider from "./context/userContext";
+import { Toaster } from "react-hot-toast";
 
 const Root = () => {
   // Check if token exists in localStorage
@@ -41,6 +42,8 @@ const App = () => {
           </Routes>
         </Router>
       </div>
+
+      <Toaster toastOptions={{ className: "", style: { fontSize: "13px" } }} />
     </UserProvider>
   );
 };
