@@ -14,32 +14,33 @@ export const SIDE_MENU_DATA = [
     icon: LuLayoutDashboard,
     path: "/dashboard",
   },
+
   {
     id: "02",
-    label: "Courses",
-    icon: LuBookOpen,
-    path: "/courses",
-  },
-  {
-    id: "03",
     label: "Assignments",
     icon: LuClipboardList,
     path: "/assignments",
   },
   {
-    id: "04",
+    id: "03",
     label: "Grades",
     icon: LuGraduationCap,
     path: "/grades",
   },
   {
-    id: "06",
+    id: "04",
+    label: "Courses",
+    icon: LuBookOpen,
+    path: "/courses",
+  },
+  {
+    id: "05",
     label: "Notifications",
     icon: LuBell,
     path: "/notifications",
   },
   {
-    id: "07",
+    id: "06",
     label: "Logout",
     icon: LuLogOut,
     path: "logout",
