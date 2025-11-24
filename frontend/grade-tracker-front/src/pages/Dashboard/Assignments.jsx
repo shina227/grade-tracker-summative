@@ -4,36 +4,62 @@ import DashboardLayout from "../../components/layouts/DashboardLayout";
 import { API_PATHS } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosInstance";
 import toast from "react-hot-toast";
+import AssignmentsOverview from "../../components/Assignments/AssignmentsOverview";
+import AddAssignmentForm from "../../components/Assignments/AddAssignmentForm";
+import Modal from "../../components/Modal.jsx";
 
 const Assignments = () => {
   useUserAuth();
 
-  const [assignmentData, setAssignmentData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [assignmentsData, setAssignmentsData] = useState([]);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(false);
+  const [coursesLoading, setCoursesLoading] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState({
     show: false,
     data: null,
   });
   const [openAddAssignmentModal, setOpenAddAssignmentModal] = useState(false);
+  const [coursesData, setCoursesData] = useState([]);
 
   // Get All Assignment Details
   const fetchAssignmentDetails = async () => {
-    if (loading) return;
+    if (assignmentsLoading) return;
 
-    setLoading(true);
+    setAssignmentsLoading(true);
 
     try {
       const response = await axiosInstance.get(
-        `${API_PATHS.ASSIGNMENTS.ASSIGNMENTS}`
+        `${API_PATHS.ASSIGNMENTS.GET_ALL_ASSIGNMENTS}`
       );
 
       if (response.data) {
-        setAssignmentData(response.data);
+        setAssignmentsData(response.data);
       }
     } catch (error) {
       console.log("Something went wrong. Please try again.", error);
     } finally {
-      setLoading(false);
+      setAssignmentsLoading(false);
+    }
+  };
+
+  // Get All Courses
+  const fetchCoursesDetails = async () => {
+    if (coursesLoading) return;
+
+    setCoursesLoading(true);
+
+    try {
+      const response = await axiosInstance.get(
+        `${API_PATHS.COURSES.GET_ALL_COURSES}`
+      );
+
+      if (response.data) {
+        setCoursesData(response.data);
+      }
+    } catch (error) {
+      console.log("Something went wrong. Please try again.", error);
+    } finally {
+      setCoursesLoading(false);
     }
   };
 
@@ -104,13 +130,34 @@ const Assignments = () => {
 
   useEffect(() => {
     fetchAssignmentDetails();
+    fetchCoursesDetails();
 
     return () => {};
   }, []);
 
   return (
     <DashboardLayout activeMenu="Assignments">
-      <div className="my-5 mx-auto"></div>
+      <div className="my-5 mx-auto">
+        <div className="grid grid-cols-1 gap-6">
+          <div className="">
+            <AssignmentsOverview
+              assignments={assignmentsData}
+              onAddAssignment={() => setOpenAddAssignmentModal(true)}
+            />
+          </div>
+        </div>
+
+        <Modal
+          isOpen={openAddAssignmentModal}
+          onClose={() => setOpenAddAssignmentModal(false)}
+          title="Add Assignment"
+        >
+          <AddAssignmentForm
+            courses={coursesData}
+            onAddAssignment={handleAddAssignment}
+          />
+        </Modal>
+      </div>
     </DashboardLayout>
   );
 };
