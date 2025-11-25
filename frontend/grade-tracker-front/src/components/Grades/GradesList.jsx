@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from "react";
-import { LuPlus } from "react-icons/lu";
 import GradesInfoCard from "../Cards/GradesInfoCard";
 
-const GradesList = ({ grades, onAddGrade, onDelete, onEdit }) => {
+const GradesList = ({ grades, onEdit, onDelete }) => {
   const [search, setSearch] = useState("");
   const [courseFilter, setCourseFilter] = useState("");
   const [scoreFilter, setScoreFilter] = useState("");
@@ -42,7 +41,7 @@ const GradesList = ({ grades, onAddGrade, onDelete, onEdit }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Search */}
         <div>
-          <label className="text-sm text-slate-800 block mb-2">
+          <label className="text-[13px] text-slate-800 block mb-2">
             Search Assignment
           </label>
           <input
@@ -50,19 +49,19 @@ const GradesList = ({ grades, onAddGrade, onDelete, onEdit }) => {
             placeholder="Search..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-transparent border border-gray-300 rounded px-3 py-2 text-sm"
+            className="w-full bg-transparent border border-gray-300 rounded px-3 py-2 text-sm outline-none"
           />
         </div>
 
         {/* Course Filter */}
         <div>
-          <label className="text-sm text-slate-800 block mb-2">
+          <label className="text-[13px] text-slate-800 block mb-2">
             Filter by Course
           </label>
           <select
             value={courseFilter}
             onChange={(e) => setCourseFilter(e.target.value)}
-            className="w-full bg-transparent border border-gray-300 rounded px-3 py-2 text-sm"
+            className="w-full bg-transparent border border-gray-300 rounded px-3 py-2 text-sm outline-none"
           >
             <option value="">All Courses</option>
             {uniqueCourses.map((course) => (
@@ -75,13 +74,13 @@ const GradesList = ({ grades, onAddGrade, onDelete, onEdit }) => {
 
         {/* Score Filter */}
         <div>
-          <label className="text-sm text-slate-800 block mb-2">
+          <label className="text-[13px] text-slate-800 block mb-2">
             Minimum Score
           </label>
           <select
             value={scoreFilter}
             onChange={(e) => setScoreFilter(e.target.value)}
-            className="w-full bg-transparent border border-gray-300 rounded px-3 py-2 text-sm"
+            className="w-full bg-transparent border border-gray-300 rounded px-3 py-2 text-sm outline-none"
           >
             <option value="">Any</option>
             <option value="50">≥ 50%</option>
@@ -107,12 +106,12 @@ const GradesList = ({ grades, onAddGrade, onDelete, onEdit }) => {
           filteredGrades.map((grade) => (
             <GradesInfoCard
               key={grade._id}
-              assignmentName={grade.assignmentId?.title}
-              courseName={grade.courseId?.courseName}
+              assignmentName={grade.assignmentId?.title || "Unknown Assignment"}
+              courseName={grade.courseId?.courseName || "Unknown Course"}
               score={grade.score}
               weight={grade.weight}
+              onEdit={() => onEdit(grade)}
               onDelete={() => onDelete(grade._id)}
-              onEdit={() => onEdit(grade._id)}
             />
           ))
         ) : (

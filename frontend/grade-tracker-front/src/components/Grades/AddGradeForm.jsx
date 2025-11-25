@@ -14,7 +14,7 @@ const AddGradeForm = ({ courses = [], assignments = [], onAddGrade }) => {
   // Filter assignments based on selected course
   const filteredAssignments = useMemo(() => {
     if (!grade.courseId) return [];
-    return assignments.filter((a) => a.courseId?._id === grade.courseId);
+    return assignments.filter((a) => a.courseId === grade.courseId);
   }, [grade.courseId, assignments]);
 
   const handleSubmit = () => {
@@ -33,7 +33,7 @@ const AddGradeForm = ({ courses = [], assignments = [], onAddGrade }) => {
         value={grade.courseId}
         onChange={({ target }) => {
           handleChange("courseId", target.value);
-          handleChange("assignmentId", ""); // reset assignment
+          handleChange("assignmentId", "");
         }}
         className="w-full bg-transparent border border-gray-300 rounded px-3 py-2 outline-none"
       >
@@ -53,7 +53,7 @@ const AddGradeForm = ({ courses = [], assignments = [], onAddGrade }) => {
         value={grade.assignmentId}
         onChange={({ target }) => handleChange("assignmentId", target.value)}
         disabled={!grade.courseId}
-        className="w-full bg-transparent border border-gray-300 rounded px-3 py-2 outline-none disabled:opacity-50"
+        className="w-full bg-transparent border border-gray-300 rounded px-3 py-2 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <option value="">
           {grade.courseId ? "Select Assignment" : "Select a course first"}
@@ -65,6 +65,11 @@ const AddGradeForm = ({ courses = [], assignments = [], onAddGrade }) => {
           </option>
         ))}
       </select>
+      {grade.courseId && filteredAssignments.length === 0 && (
+        <p className="text-xs text-orange-600 mt-1">
+          No assignments found for this course
+        </p>
+      )}
 
       {/* Score */}
       <Input
@@ -87,6 +92,18 @@ const AddGradeForm = ({ courses = [], assignments = [], onAddGrade }) => {
         min="0"
         max="100"
       />
+
+      {/* Preview Weighted Score */}
+      {grade.score && grade.weight && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
+          <p className="text-xs text-blue-700 font-medium mb-1">
+            Weighted Score Preview
+          </p>
+          <p className="text-lg font-bold text-blue-900">
+            {((Number(grade.score) * Number(grade.weight)) / 100).toFixed(2)}%
+          </p>
+        </div>
+      )}
 
       <div className="flex justify-end mt-6">
         <button
