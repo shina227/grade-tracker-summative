@@ -50,24 +50,3 @@ export const prepareCoursesBarChartData = (courses = [], groupBy = "term") => {
 
   return chartData;
 };
-
-// Prep Assignment Line Chart
-export const prepareAssignmentsLineChartData = (assignments = []) => {
-  if (!Array.isArray(assignments)) return [];
-
-  const chartData = [];
-
-  assignments
-    .filter((a) => a.dueDate)
-    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-    .forEach((a) => {
-      chartData.push({
-        label: a.dueDate,
-        value: Number(a.grade) || 0,
-        title: a.title, // optional
-        status: a.status, // optional
-      });
-    });
-
-  return chartData;
-};

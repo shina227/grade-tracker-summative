@@ -4,14 +4,17 @@ import DashboardLayout from "../../components/layouts/DashboardLayout";
 import { API_PATHS } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosInstance";
 import toast from "react-hot-toast";
-import AssignmentsOverview from "../../components/Assignments/AssignmentsOverview";
 import AddAssignmentForm from "../../components/Assignments/AddAssignmentForm";
+import EditAssignmentForm from "../../components/Assignments/EditAssignmentForm";
 import Modal from "../../components/Modal.jsx";
+import AssignmentsList from "../../components/Assignments/AssignmentsList.jsx";
+import DeleteAlert from "../../components/DeleteAlert";
 
 const Assignments = () => {
   useUserAuth();
 
   const [assignmentsData, setAssignmentsData] = useState([]);
+  const [coursesData, setCoursesData] = useState([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState({
@@ -19,7 +22,10 @@ const Assignments = () => {
     data: null,
   });
   const [openAddAssignmentModal, setOpenAddAssignmentModal] = useState(false);
-  const [coursesData, setCoursesData] = useState([]);
+  const [openEditAssignmentModal, setOpenEditAssignmentModal] = useState({
+    show: false,
+    data: null,
+  });
 
   // Get All Assignment Details
   const fetchAssignmentDetails = async () => {
@@ -79,7 +85,7 @@ const Assignments = () => {
     }
 
     if (weight < 0 || weight > 100) {
-      toast.error("Weight must be 0 and 100.");
+      toast.error("Weight must be between 0 and 100.");
       return;
     }
 
@@ -109,16 +115,66 @@ const Assignments = () => {
     }
   };
 
-  // Handle Update Course
-  const handleUpdateAssignment = async () => {};
+  // Handle Update Assignment
+  const handleUpdateAssignment = async (updatedAssignment) => {
+    const currentAssignment = openEditAssignmentModal.data;
+    if (!currentAssignment || !currentAssignment?._id) {
+      toast.error("Cannot update: assignment ID missing.");
+      return;
+    }
 
-  // Delete Course
+    const payload = {
+      courseId: updatedAssignment.courseId || currentAssignment.courseId,
+      title: updatedAssignment.title || currentAssignment.title,
+      description:
+        updatedAssignment.description ?? currentAssignment.description,
+      dueDate: updatedAssignment.dueDate ?? currentAssignment.dueDate,
+      weight:
+        updatedAssignment.weight !== undefined
+          ? Number(updatedAssignment.weight)
+          : currentAssignment.weight,
+      grade:
+        updatedAssignment.grade !== undefined
+          ? Number(updatedAssignment.grade)
+          : currentAssignment.grade,
+      status: updatedAssignment.status || currentAssignment.status,
+    };
+
+    if (payload.weight < 0 || payload.weight > 100) {
+      toast.error("Weight must be between 0 and 100.");
+      return;
+    }
+
+    if (payload.grade < 0 || payload.grade > 100) {
+      toast.error("Grade must be between 0 and 100.");
+      return;
+    }
+
+    try {
+      await axiosInstance.put(
+        API_PATHS.ASSIGNMENTS.UPDATE_ASSIGNMENT(currentAssignment._id),
+        payload
+      );
+
+      setOpenEditAssignmentModal({ show: false, data: null });
+      toast.success("Assignment updated successfully!");
+      fetchAssignmentDetails();
+    } catch (error) {
+      console.error(
+        "Error updating assignment:",
+        error.response?.data?.message || error.message
+      );
+      toast.error("Failed to update assignment. Please try again.");
+    }
+  };
+
+  // Delete Assignment
   const deleteAssignment = async (id) => {
     try {
       await axiosInstance.delete(API_PATHS.ASSIGNMENTS.DELETE_ASSIGNMENT(id));
 
       setOpenDeleteAlert({ show: false, data: null });
-      toast.success("Assignment details deleted successfully");
+      toast.success("Assignment deleted successfully");
       fetchAssignmentDetails();
     } catch (error) {
       console.error(
@@ -139,14 +195,18 @@ const Assignments = () => {
     <DashboardLayout activeMenu="Assignments">
       <div className="my-5 mx-auto">
         <div className="grid grid-cols-1 gap-6">
-          <div className="">
-            <AssignmentsOverview
-              assignments={assignmentsData}
-              onAddAssignment={() => setOpenAddAssignmentModal(true)}
-            />
-          </div>
+          {/* Assignments List */}
+          <AssignmentsList
+            assignments={assignmentsData}
+            onAddAssignment={() => setOpenAddAssignmentModal(true)}
+            onEdit={(assignment) =>
+              setOpenEditAssignmentModal({ show: true, data: assignment })
+            }
+            onDelete={(id) => setOpenDeleteAlert({ show: true, data: id })}
+          />
         </div>
 
+        {/* Add Assignment Modal */}
         <Modal
           isOpen={openAddAssignmentModal}
           onClose={() => setOpenAddAssignmentModal(false)}
@@ -155,6 +215,33 @@ const Assignments = () => {
           <AddAssignmentForm
             courses={coursesData}
             onAddAssignment={handleAddAssignment}
+          />
+        </Modal>
+
+        {/* Edit Assignment Modal */}
+        <Modal
+          isOpen={openEditAssignmentModal.show}
+          onClose={() =>
+            setOpenEditAssignmentModal({ show: false, data: null })
+          }
+          title="Edit Assignment"
+        >
+          <EditAssignmentForm
+            assignment={openEditAssignmentModal.data}
+            courses={coursesData}
+            onUpdateAssignment={handleUpdateAssignment}
+          />
+        </Modal>
+
+        {/* Delete Modal */}
+        <Modal
+          isOpen={openDeleteAlert.show}
+          onClose={() => setOpenDeleteAlert({ show: false, data: null })}
+          title="Delete Assignment"
+        >
+          <DeleteAlert
+            content="Are you sure you want to delete this assignment?"
+            onDelete={() => deleteAssignment(openDeleteAlert.data)}
           />
         </Modal>
       </div>

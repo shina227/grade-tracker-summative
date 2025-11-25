@@ -4,7 +4,8 @@ const Course = require("../models/Courses");
 
 // Add Assignment
 exports.addAssignment = async (req, res) => {
-  const { courseId, title, description, dueDate, weight } = req.body;
+  const { courseId, title, description, dueDate, grade, weight, status } =
+    req.body;
   try {
     // Check required fields
     if (!courseId || !title) {
@@ -23,6 +24,8 @@ exports.addAssignment = async (req, res) => {
       description,
       dueDate,
       weight,
+      grade,
+      status,
       userId: req.user.id,
     });
 
@@ -44,9 +47,10 @@ exports.getAllAssignments = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const assignments = await Assignment.find({ userId }).sort({
-      createdAt: -1,
-    });
+    const assignments = await Assignment.find({ userId })
+      .populate("courseId", "courseName term year status")
+      .sort({ createdAt: -1 });
+
     res.json(assignments);
   } catch (error) {
     console.error("Error getting assignments:", error);
@@ -73,10 +77,11 @@ exports.updateAssignment = async (req, res) => {
     const assignment = await Assignment.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true }
+      { new: true, runValidators: true }
     );
     if (!assignment)
       return res.status(404).json({ message: "Assignment not found" });
+
     res.json(assignment);
   } catch (error) {
     console.error("Error updating assignment:", error);

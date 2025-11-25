@@ -1,28 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Input from "../Inputs/Input";
 
-const AddAssignmentForm = ({ courses = [], onAddAssignment }) => {
-  const [assignment, setAssignment] = useState({
-    courseId: "",
-    title: "",
-    description: "",
-    dueDate: "",
-    weight: "",
-    grade: "",
-    status: "Pending",
-  });
+const EditAssignmentForm = ({
+  courses = [],
+  assignment: initialAssignment,
+  onUpdateAssignment,
+}) => {
+  const [assignment, setAssignment] = useState(initialAssignment || {});
+
+  useEffect(() => {
+    setAssignment(initialAssignment || {});
+  }, [initialAssignment]);
 
   const handleChange = (key, value) =>
     setAssignment({ ...assignment, [key]: value });
 
   const handleSubmit = () => {
-    // Convert weight and grade to numbers before submitting
-    onAddAssignment({
+    onUpdateAssignment({
       ...assignment,
       weight: Number(assignment.weight) || 0,
       grade: Number(assignment.grade) || 0,
     });
   };
+
+  if (!assignment) return null;
 
   return (
     <div>
@@ -30,7 +31,7 @@ const AddAssignmentForm = ({ courses = [], onAddAssignment }) => {
       <select
         value={assignment.courseId}
         onChange={({ target }) => handleChange("courseId", target.value)}
-        className="w-full bg-transparent border border-gray-300 rounded px-3 py-2 outline-none placeholder:text-slate-500"
+        className="w-full bg-transparent border border-gray-300 rounded px-3 py-2 outline-none placeholder:text-slate-500 mb-2"
       >
         <option value="">Select Course</option>
         {courses.map((course) => (
@@ -43,8 +44,8 @@ const AddAssignmentForm = ({ courses = [], onAddAssignment }) => {
       <Input
         value={assignment.title}
         onChange={({ target }) => handleChange("title", target.value)}
-        label="Assignment Title"
-        placeholder="Add your assignment title"
+        label="Assignment Name"
+        placeholder="Change your assignment name"
         type="text"
       />
 
@@ -52,7 +53,7 @@ const AddAssignmentForm = ({ courses = [], onAddAssignment }) => {
         value={assignment.description}
         onChange={({ target }) => handleChange("description", target.value)}
         label="Description"
-        placeholder="Add a description"
+        placeholder="Change the description"
         type="text"
       />
 
@@ -60,7 +61,6 @@ const AddAssignmentForm = ({ courses = [], onAddAssignment }) => {
         value={assignment.dueDate}
         onChange={({ target }) => handleChange("dueDate", target.value)}
         label="Due Date"
-        placeholder="Select due date"
         type="date"
       />
 
@@ -68,7 +68,7 @@ const AddAssignmentForm = ({ courses = [], onAddAssignment }) => {
         value={assignment.weight}
         onChange={({ target }) => handleChange("weight", target.value)}
         label="Weight"
-        placeholder="Enter weight (0-100)"
+        placeholder="Change the weight (0-100)"
         type="number"
         min="0"
         max="100"
@@ -78,7 +78,7 @@ const AddAssignmentForm = ({ courses = [], onAddAssignment }) => {
         value={assignment.grade}
         onChange={({ target }) => handleChange("grade", target.value)}
         label="Grade"
-        placeholder="Enter grade (0-100)"
+        placeholder="Change the grade (0-100)"
         type="number"
         min="0"
         max="100"
@@ -102,11 +102,11 @@ const AddAssignmentForm = ({ courses = [], onAddAssignment }) => {
           className="add-btn add-btn-fill"
           onClick={handleSubmit}
         >
-          Add Assignment
+          Update Assignment
         </button>
       </div>
     </div>
   );
 };
 
-export default AddAssignmentForm;
+export default EditAssignmentForm;
