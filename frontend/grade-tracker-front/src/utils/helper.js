@@ -20,16 +20,6 @@ export const getInitials = (name) => {
   return initials.toUpperCase();
 };
 
-// Prepare Data for Grades Over Time Bar Chart
-export const prepareGradesBarChartData = (grades = []) => {
-  if (!Array.isArray(grades)) return [];
-
-  return grades.map((item) => ({
-    label: moment(item.date), // x-axis
-    value: Number(item.grade) || 0, // y-axis
-  }));
-};
-
 // Prepare Courses bar chart data
 // groupBy: "term" or "year"
 export const prepareCoursesBarChartData = (courses = [], groupBy = "term") => {
@@ -49,4 +39,83 @@ export const prepareCoursesBarChartData = (courses = [], groupBy = "term") => {
     .map(([label, value]) => ({ label, value }));
 
   return chartData;
+};
+
+// Prepare Grades line chart data - Group by course and calculate average score
+export const prepareGradesBarChartData = (grades = []) => {
+  if (!Array.isArray(grades) || grades.length === 0) return [];
+
+  // Group grades by course
+  const groupedByCourse = {};
+
+  grades.forEach((grade) => {
+    const courseName = grade.courseId?.courseName || "Unknown Course";
+
+    if (!groupedByCourse[courseName]) {
+      groupedByCourse[courseName] = {
+        scores: [],
+        weights: [],
+      };
+    }
+
+    groupedByCourse[courseName].scores.push(Number(grade.score) || 0);
+    groupedByCourse[courseName].weights.push(Number(grade.weight) || 0);
+  });
+
+  // Calculate weighted average for each course
+  const chartData = Object.entries(groupedByCourse).map(
+    ([courseName, data]) => {
+      const totalWeightedScore = data.scores.reduce((sum, score, idx) => {
+        return sum + score * data.weights[idx];
+      }, 0);
+
+      const totalWeight = data.weights.reduce((sum, weight) => sum + weight, 0);
+
+      const weightedAverage =
+        totalWeight > 0 ? totalWeightedScore / totalWeight : 0;
+
+      return {
+        label: courseName,
+        value: Math.round(weightedAverage * 100) / 100, // Round to 2 decimals
+      };
+    }
+  );
+
+  // Sort by course name
+  return chartData.sort((a, b) => a.label.localeCompare(b.label));
+};
+
+// Calculate Weighted GPA and statistics based on assignment grades
+export const calculateWeightedGPA = (grades = []) => {
+  if (!Array.isArray(grades) || grades.length === 0) {
+    return {
+      weightedAverage: 0,
+      totalGrades: 0,
+      averageScore: 0,
+    };
+  }
+
+  // Calculate weighted average across all grades
+  let totalWeightedScore = 0;
+  let totalWeight = 0;
+  let totalScore = 0;
+
+  grades.forEach((grade) => {
+    const score = Number(grade.score) || 0;
+    const weight = Number(grade.weight) || 0;
+
+    totalWeightedScore += (score * weight) / 100;
+    totalWeight += weight;
+    totalScore += score;
+  });
+
+  const weightedAverage =
+    totalWeight > 0 ? (totalWeightedScore / totalWeight) * 100 : 0;
+  const averageScore = grades.length > 0 ? totalScore / grades.length : 0;
+
+  return {
+    weightedAverage: weightedAverage,
+    totalGrades: grades.length,
+    averageScore: averageScore,
+  };
 };
