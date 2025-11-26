@@ -14,6 +14,8 @@ import Grades from "./pages/Dashboard/Grades";
 import Calendar from "./pages/Dashboard/Calendar";
 import UserProvider from "./context/userContext";
 import { Toaster } from "react-hot-toast";
+import Profile from "./pages/Dashboard/Profile";
+import Settings from "./pages/Dashboard/Settings";
 
 const Root = () => {
   // Check if token exists in localStorage
@@ -41,6 +43,8 @@ const App = () => {
             <Route path="/assignments" element={<Assignments />} />
             <Route path="/grades" element={<Grades />} />
             <Route path="/calendar" element={<Calendar />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </Router>
       </div>

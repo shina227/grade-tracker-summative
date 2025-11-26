@@ -268,16 +268,26 @@ const Navbar = ({ activeMenu }) => {
         <div className="relative" ref={userMenuRef}>
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors cursor-pointer"
           >
-            <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">
-                {getInitials(user?.name || "User")}
-              </span>
-            </div>
+            {user?.profileImageUrl ? (
+              <img
+                src={user?.profileImageUrl}
+                alt="Profile Image"
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              <CharAvatar
+                fullName={user?.fullName}
+                width="w-8"
+                height="h-8"
+                style="text-sm"
+              />
+            )}
+
             <div className="hidden md:block text-left">
               <p className="text-sm font-medium text-gray-800">
-                {user?.name || "User"}
+                {user?.fullName || "User"}
               </p>
               <p className="text-xs text-gray-500">Student</p>
             </div>
@@ -285,11 +295,11 @@ const Navbar = ({ activeMenu }) => {
 
           {/* User Dropdown */}
           {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 px-2">
               {/* User Info */}
               <div className="px-4 py-3 border-b border-gray-200">
                 <p className="text-sm font-medium text-gray-800">
-                  {user?.name || "User"}
+                  {user?.fullName || "User"}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">
                   {user?.email || "user@example.com"}
@@ -302,7 +312,7 @@ const Navbar = ({ activeMenu }) => {
                   setShowUserMenu(false);
                   navigate("/profile");
                 }}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                className="w-full flex items-center mt-2 gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
               >
                 <LuUser size={18} />
                 Profile
@@ -313,24 +323,11 @@ const Navbar = ({ activeMenu }) => {
                   setShowUserMenu(false);
                   navigate("/settings");
                 }}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
               >
                 <LuSettings size={18} />
                 Settings
               </button>
-
-              <div className="border-t border-gray-200 mt-2 pt-2">
-                <button
-                  onClick={() => {
-                    setShowUserMenu(false);
-                    handleLogout();
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                >
-                  <LuLogOut size={18} />
-                  Logout
-                </button>
-              </div>
             </div>
           )}
         </div>
