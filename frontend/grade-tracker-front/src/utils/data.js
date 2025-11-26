@@ -1,10 +1,11 @@
 import {
   LuLayoutDashboard,
-  LuBookOpen, // Courses
-  LuClipboardList, // Assignments
-  LuGraduationCap, // Grades
-  LuBell, // Notifications
+  LuBookOpen,
+  LuClipboardList,
+  LuCalendar,
   LuLogOut,
+  LuChartBar,
+  LuChartColumn,
 } from "react-icons/lu";
 
 export const SIDE_MENU_DATA = [
@@ -24,7 +25,7 @@ export const SIDE_MENU_DATA = [
   {
     id: "03",
     label: "Grades",
-    icon: LuGraduationCap,
+    icon: LuChartColumn,
     path: "/grades",
   },
   {
@@ -35,9 +36,9 @@ export const SIDE_MENU_DATA = [
   },
   {
     id: "05",
-    label: "Notifications",
-    icon: LuBell,
-    path: "/notifications",
+    label: "Calendar",
+    icon: LuCalendar,
+    path: "/calendar",
   },
   {
     id: "06",

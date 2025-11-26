@@ -11,6 +11,7 @@ import Home from "./pages/Dashboard/Home";
 import Courses from "./pages/Dashboard/Courses";
 import Assignments from "./pages/Dashboard/Assignments";
 import Grades from "./pages/Dashboard/Grades";
+import Calendar from "./pages/Dashboard/Calendar";
 import UserProvider from "./context/userContext";
 import { Toaster } from "react-hot-toast";
 
@@ -39,6 +40,7 @@ const App = () => {
             <Route path="/courses" element={<Courses />} />
             <Route path="/assignments" element={<Assignments />} />
             <Route path="/grades" element={<Grades />} />
+            <Route path="/calendar" element={<Calendar />} />
           </Routes>
         </Router>
       </div>
