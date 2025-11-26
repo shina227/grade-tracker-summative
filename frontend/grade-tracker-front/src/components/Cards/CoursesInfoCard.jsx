@@ -1,5 +1,11 @@
 import React from "react";
-import { LuTrash2, LuBookOpen, LuCircleCheck, LuClock } from "react-icons/lu";
+import {
+  LuTrash2,
+  LuBookOpen,
+  LuCircleCheck,
+  LuClock,
+  LuPencil,
+} from "react-icons/lu";
 
 const CoursesInfoCard = ({
   name,
@@ -7,6 +13,8 @@ const CoursesInfoCard = ({
   year,
   status,
   hiddenDeleteBtn,
+  hiddenEditBtn,
+  onEdit,
   onDelete,
 }) => {
   // Status styles & icons
@@ -57,6 +65,15 @@ const CoursesInfoCard = ({
           {statusStyles.icon}
           {status}
         </span>
+
+        {!hiddenEditBtn && (
+          <button
+            onClick={onEdit}
+            className="text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+          >
+            <LuPencil size={16} />
+          </button>
+        )}
 
         {!hiddenDeleteBtn && (
           <button

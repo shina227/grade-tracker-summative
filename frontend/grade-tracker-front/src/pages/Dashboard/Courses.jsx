@@ -5,6 +5,7 @@ import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import Modal from "../../components/Modal";
 import AddCourseForm from "../../components/Courses/AddCourseForm";
+import EditCourseForm from "../../components/Courses/EditCourseForm";
 import toast from "react-hot-toast";
 import CoursesList from "../../components/Courses/CoursesList";
 import DeleteAlert from "../../components/DeleteAlert";
@@ -20,6 +21,10 @@ const Courses = () => {
     data: null,
   });
   const [openAddCourseModal, setOpenAddCourseModal] = useState(false);
+  const [openEditCourseModal, setOpenEditCourseModal] = useState({
+    show: false,
+    data: null,
+  });
 
   // Get All Courses Details
   const fetchCoursesDetails = async () => {
@@ -81,7 +86,47 @@ const Courses = () => {
   };
 
   // Handle Update Course
-  const handleUpdateCourse = async () => {};
+  const handleUpdateCourse = async (updatedCourse) => {
+    const { courseName, term, year, status } = updatedCourse;
+
+    // Validation Checks
+    if (!courseName.trim()) {
+      toast.error("Course Name is required.");
+      return;
+    }
+
+    if (!term) {
+      toast.error("Term is required.");
+      return;
+    }
+
+    if (!year || year < 2000 || year > 2100) {
+      toast.error("Please enter a valid year between 2000 and 2100.");
+      return;
+    }
+
+    try {
+      await axiosInstance.put(
+        API_PATHS.COURSES.UPDATE_COURSE(openEditCourseModal.data._id),
+        {
+          courseName,
+          term,
+          year,
+          status,
+        }
+      );
+
+      setOpenEditCourseModal({ show: false, data: null });
+      toast.success("Course updated successfully!");
+      fetchCoursesDetails();
+    } catch (error) {
+      console.error(
+        "Error updating course:",
+        error.response?.data?.message || error.message
+      );
+      toast.error("Failed to updated course. Please try again.");
+    }
+  };
 
   // Delete Course
   const deleteCourse = async (id) => {
@@ -120,6 +165,9 @@ const Courses = () => {
           {/* Courses List */}
           <CoursesList
             courses={coursesData}
+            onEdit={(course) =>
+              setOpenEditCourseModal({ show: true, data: course })
+            }
             onDelete={(id) => setOpenDeleteAlert({ show: true, data: id })}
           />
         </div>
@@ -142,6 +190,18 @@ const Courses = () => {
           <DeleteAlert
             content="Are you sure you want to delete this course?"
             onDelete={() => deleteCourse(openDeleteAlert.data)}
+          />
+        </Modal>
+
+        {/* Edit Course Modal */}
+        <Modal
+          isOpen={openEditCourseModal.show}
+          onClose={() => setOpenEditCourseModal({ show: false, data: null })}
+          title="Edit Course"
+        >
+          <EditCourseForm
+            course={openEditCourseModal.data}
+            onUpdateCourse={handleUpdateCourse}
           />
         </Modal>
       </div>
