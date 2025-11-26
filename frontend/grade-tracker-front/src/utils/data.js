@@ -4,7 +4,6 @@ import {
   LuClipboardList,
   LuCalendar,
   LuLogOut,
-  LuChartBar,
   LuChartColumn,
 } from "react-icons/lu";
 
@@ -39,11 +38,5 @@ export const SIDE_MENU_DATA = [
     label: "Calendar",
     icon: LuCalendar,
     path: "/calendar",
-  },
-  {
-    id: "06",
-    label: "Logout",
-    icon: LuLogOut,
-    path: "logout",
   },
 ];
