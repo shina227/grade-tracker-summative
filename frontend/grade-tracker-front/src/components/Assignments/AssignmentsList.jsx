@@ -1,95 +1,52 @@
 import React, { useState, useMemo } from "react";
-import { LuPlus } from "react-icons/lu";
 import AssignmentsInfoCard from "../Cards/AssignmentsInfoCard";
 
-const AssignmentsList = ({
-  assignments,
-  onAddAssignment,
-  onDelete,
-  onEdit,
-}) => {
+const TABS = ["List", "Calendar"];
+
+const AssignmentsList = ({ assignments, onDelete, onEdit }) => {
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [courseFilter, setCourseFilter] = useState("");
+  const [activeTab, setActiveTab] = useState("List");
 
-  // Get unique courses for filter dropdown
-  const uniqueCourses = useMemo(() => {
-    const courses = assignments?.map(
-      (a) => a.courseId?.courseName || "Unknown Course"
-    );
-    return [...new Set(courses)].sort();
-  }, [assignments]);
-
-  // Filter assignments
+  // Search assignments
   const filteredAssignments = useMemo(() => {
     if (!assignments) return [];
 
     return assignments.filter((assignment) => {
-      const matchesSearch = assignment.title
-        .toLowerCase()
-        .includes(search.toLowerCase());
-      const matchesStatus = statusFilter
-        ? assignment.status === statusFilter
-        : true;
-      const matchesCourse = courseFilter
-        ? (assignment.courseId?.courseName || "Unknown Course") === courseFilter
-        : true;
-
-      return matchesSearch && matchesStatus && matchesCourse;
+      assignment.title.toLowerCase().includes(search.toLowerCase());
     });
-  }, [assignments, search, statusFilter, courseFilter]);
+  }, [assignments, search]);
 
   return (
-    <div className="">
-      {/* Search & Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        {/* Search Input */}
-        <div>
-          <label className="text-[14px] text-slate-800 block mb-2">
-            Search
-          </label>
+    <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
+      {/* Search */}
+      <div className="w-full md:w-3/4">
+        <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-md px-4 py-2 shadow-sm">
           <input
             type="text"
-            placeholder="Search assignments..."
+            placeholder="Find assignments by name or course"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white border border-gray-300 rounded px-3 py-2 outline-none text-sm"
+            className="w-full bg-transparent outline-none text-sm"
           />
         </div>
+      </div>
 
-        {/* Status Filter */}
-        <div>
-          <label className="text-[14px] text-slate-800 block mb-2">
-            Filter by Status
-          </label>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full bg-white border border-gray-300 rounded px-3 py-2 outline-none text-sm"
-          >
-            <option value="">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="Completed">Completed</option>
-          </select>
-        </div>
-
-        {/* Course Filter */}
-        <div>
-          <label className="text-[14px] text-slate-800 block mb-2">
-            Filter by Course
-          </label>
-          <select
-            value={courseFilter}
-            onChange={(e) => setCourseFilter(e.target.value)}
-            className="w-full bg-white border border-gray-300 rounded px-3 py-2 outline-none text-sm"
-          >
-            <option value="">All Courses</option>
-            {uniqueCourses.map((course) => (
-              <option key={course} value={course}>
-                {course}
-              </option>
-            ))}
-          </select>
+      {/* Tabs */}
+      <div className="w-full md:w-1/4 flex justify-end">
+        <div className="flex bg-gray-100 rounded-lg p-1 border-gray-200">
+          {TABS.map((tab) => (
+            <button
+              key={tab}
+              className={`flex-1 px-3 py-1.5 text-sm rounded-md transition ${
+                activeTab === tab
+                  ? "bg-white text-primary font-medium"
+                  : "text-gray-600 hover:bg-gray-200"
+              }`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
       </div>
 

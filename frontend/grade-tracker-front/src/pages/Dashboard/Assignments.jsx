@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useUserAuth } from "../../hooks/useUserAuth";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import { API_PATHS } from "../../utils/apiPaths";
@@ -7,12 +8,15 @@ import toast from "react-hot-toast";
 import AddAssignmentForm from "../../components/Assignments/AddAssignmentForm";
 import EditAssignmentForm from "../../components/Assignments/EditAssignmentForm";
 import Modal from "../../components/Modal.jsx";
-import AssignmentsList from "../../components/Assignments/AssignmentsList.jsx";
 import DeleteAlert from "../../components/DeleteAlert";
 import { LuPlus } from "react-icons/lu";
+import AssignmentsTable from "../../components/Assignments/AssignmentsTable.jsx";
+import CalendarView from "../../components/Calendar/CalendarView.jsx";
+import AssignmentDetailsModal from "../../components/Calendar/AssignmentDetailsModal.jsx";
 
 const Assignments = () => {
   useUserAuth();
+  const navigate = useNavigate();
 
   const [assignmentsData, setAssignmentsData] = useState([]);
   const [coursesData, setCoursesData] = useState([]);
@@ -27,6 +31,25 @@ const Assignments = () => {
     show: false,
     data: null,
   });
+  const [view, setView] = useState("list");
+  const [search, setSearch] = useState("");
+  const [openDetailsModal, setOpenDetailsModal] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
+
+  const handleAssignmentClick = (assignment) => {
+    setSelectedAssignment(assignment);
+    setOpenDetailsModal(true);
+  };
+
+  const handleEdit = () => {
+    setOpenDetailsModal(false);
+    setOpenEditAssignmentModal({ show: true, data: selectedAssignment });
+  };
+
+  const handleDelete = (id) => {
+    setOpenDeleteAlert({ show: true, data: id });
+    setOpenDetailsModal(false);
+  };
 
   // Get All Assignment Details
   const fetchAssignmentDetails = async () => {
@@ -192,9 +215,19 @@ const Assignments = () => {
     return () => {};
   }, []);
 
+  // Filter assignments based on search
+  const filteredAssignments = assignmentsData.filter((assignment) => {
+    const matchesSearch =
+      assignment.title.toLowerCase().includes(search.toLowerCase()) ||
+      assignment.courseId?.courseName
+        ?.toLowerCase()
+        .includes(search.toLowerCase());
+    return matchesSearch;
+  });
+
   return (
     <DashboardLayout activeMenu="Assignments">
-      <div className="my-5 mx-auto space-y-8">
+      <div className="my-5 mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="space-y-1">
@@ -212,16 +245,60 @@ const Assignments = () => {
           </button>
         </div>
 
+        {/* Search and tabs */}
+        <div className="flex items-center justify-between mb-6">
+          {/* Search */}
+          <div className="relative flex-1 mr-16">
+            <input
+              type="text"
+              placeholder="Find assignments by name or course"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-500"
+            />
+          </div>
+          {/* Tabs */}
+          <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setView("list")}
+              className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                view === "list"
+                  ? "bg-white text-primary shadow-sm"
+                  : "text-gray-600 hover-gray-900"
+              }`}
+            >
+              List
+            </button>
+            <button
+              onClick={() => setView("calendar")}
+              className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                view === "calendar"
+                  ? "bg-white text-primary shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Calendar
+            </button>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-6">
-          {/* Assignments List */}
-          <AssignmentsList
-            assignments={assignmentsData}
-            onAddAssignment={() => setOpenAddAssignmentModal(true)}
-            onEdit={(assignment) =>
-              setOpenEditAssignmentModal({ show: true, data: assignment })
-            }
-            onDelete={(id) => setOpenDeleteAlert({ show: true, data: id })}
-          />
+          {/* Assignments Table */}
+          {view === "list" ? (
+            <AssignmentsTable
+              assignments={filteredAssignments}
+              onEdit={(assignment) =>
+                setOpenEditAssignmentModal({ show: true, data: assignment })
+              }
+              onDelete={(id) => setOpenDeleteAlert({ show: true, data: id })}
+            />
+          ) : (
+            <CalendarView
+              assignments={filteredAssignments}
+              courses={coursesData}
+              onAssignmentClick={handleAssignmentClick}
+            />
+          )}
         </div>
 
         {/* Add Assignment Modal */}
@@ -260,6 +337,20 @@ const Assignments = () => {
           <DeleteAlert
             content="Are you sure you want to delete this assignment?"
             onDelete={() => deleteAssignment(openDeleteAlert.data)}
+          />
+        </Modal>
+
+        {/* Calendar assignment details */}
+        <Modal
+          isOpen={openDetailsModal}
+          onClose={() => setOpenDetailsModal(false)}
+        >
+          <AssignmentDetailsModal
+            assignment={selectedAssignment}
+            onEdit={handleEdit}
+            onDelete={(id) => {
+              handleDelete(id);
+            }}
           />
         </Modal>
       </div>

@@ -136,14 +136,14 @@ const AssignmentDetailsModal = ({ assignment, onEdit, onDelete }) => {
       <div className="flex gap-3 pt-4 border-t border-gray-200">
         <button
           onClick={onEdit}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors cursor-pointer"
         >
           <LuPencil size={16} />
           Edit Assignment
         </button>
         <button
-          onClick={onDelete}
-          className="flex items-center justify-center gap-2 px-4 py-2 border border-red-300 text-red-600 rounded hover:bg-red-50 transition-colors"
+          onClick={() => onDelete(assignment._id)}
+          className="flex items-center justify-center gap-2 px-4 py-2 border border-red-300 text-red-600 rounded hover:bg-red-50 transition-colors cursor-pointer"
         >
           <LuTrash2 size={16} />
           Delete
