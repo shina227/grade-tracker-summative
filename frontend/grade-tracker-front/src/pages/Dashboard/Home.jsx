@@ -1,115 +1,128 @@
-import React, { useEffect, useState } from "react";
-import DashboardLayout from "../../components/layouts/DashboardLayout";
-import { useUserAuth } from "../../hooks/useUserAuth";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import DashboardLayout from "../../components/layouts/DashboardLayout";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
-import { InfoCard } from "../../components/Cards/InfoCard";
+import { UserContext } from "../../context/userContext";
 import UpcomingAssignments from "../../components/Dashboard/UpcomingAssignments";
-import AssignmentsOverview from "../../components/Dashboard/AssignmentsOverview";
-import AssignmentDetails from "../../components/Dashboard/AssignmentDetails";
-import GradesOverTime from "../../components/Dashboard/GradesOverTime";
-import GradesDistribution from "../../components/Dashboard/GradesDistribution";
-import GradesPerCourse from "../../components/Dashboard/GradesPerCourse";
+import CourseOverview from "../../components/Dashboard/CourseOverview";
+import OverallGPA from "../../components/Dashboard/OverallGPA";
+import RecentGrades from "../../components/Dashboard/RecentGrades";
+import { calculateOverallGPA, getLetterGrade } from "../../utils/helper";
 
-import { LuClipboardList, LuBookOpen, LuGraduationCap } from "react-icons/lu";
-import { IoMdCard } from "react-icons/io";
-
-const Home = () => {
-  useUserAuth();
-
+const Dashboard = () => {
+  const { user } = useContext(UserContext);
   const navigate = useNavigate();
 
-  const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const fetchDashboardData = async () => {
-    if (loading) return;
-
-    setLoading(true);
-
-    try {
-      const response = await axiosInstance.get(
-        `${API_PATHS.DASHBOARD.GET_DATA}`
-      );
-
-      if (response.data) {
-        setDashboardData(response.data);
-      }
-    } catch (error) {
-      console.log("Something went wrong. Please try again", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [assignmentsData, setAssignmentsData] = useState([]);
+  const [coursesData, setCoursesData] = useState([]);
+  const [gradesData, setGradesData] = useState([]);
 
   useEffect(() => {
-    fetchDashboardData();
-    return () => {};
+    const fetchData = async () => {
+      const [a, c, g] = await Promise.all([
+        axiosInstance.get(API_PATHS.ASSIGNMENTS.GET_ALL_ASSIGNMENTS),
+        axiosInstance.get(API_PATHS.COURSES.GET_ALL_COURSES),
+        axiosInstance.get(API_PATHS.GRADES.GET_ALL_GRADES),
+      ]);
+
+      setAssignmentsData(a.data);
+      setCoursesData(c.data);
+      setGradesData(g.data);
+    };
+
+    fetchData();
   }, []);
+
+  const upcomingAssignments = assignmentsData
+    .filter((a) => a.status === "Pending")
+    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+    .slice(0, 5);
+
+  const recentGrades = [...gradesData]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5);
+
+  const overallGPA = calculateOverallGPA(gradesData);
+
+  const courseGrades = coursesData.map((course) => {
+    const courseGrades = gradesData.filter(
+      (g) => g.courseId?._id === course._id || g.courseId === course._id
+    );
+
+    if (courseGrades.length === 0)
+      return { ...course, averageGrade: 0, letterGrade: "N/A" };
+
+    const totalWeighted = courseGrades.reduce(
+      (sum, g) => sum + (g.score * g.weight) / 100,
+      0
+    );
+
+    const totalWeight = courseGrades.reduce((sum, g) => sum + g.weight, 0);
+
+    const averageGrade = totalWeight ? (totalWeighted / totalWeight) * 100 : 0;
+
+    return {
+      ...course,
+      averageGrade,
+      letterGrade: getLetterGrade(averageGrade),
+    };
+  });
+
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+
+  const getGradeColor = (grade) => {
+    if (grade >= 90) return "text-green-600 bg-green-100 border-green-200";
+    if (grade >= 80) return "text-blue-600 bg-blue-100 border-blue-200";
+    if (grade >= 70) return "text-yellow-600 bg-yellow-100 border-yellow-200";
+    if (grade >= 60) return "text-orange-600 bg-orange-100 border-orange-200";
+    return "text-red-600 bg-red-100 border-red-200";
+  };
 
   return (
     <DashboardLayout activeMenu="Dashboard">
-      <div className="my-5 mx-auto">
-        {/* Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <InfoCard
-            icon={<LuBookOpen size={26} />}
-            label="Courses Enrolled"
-            value={dashboardData?.totalCourses || 0}
-            color="bg-primary"
-          />
-          <InfoCard
-            icon={<LuClipboardList size={26} />}
-            label="Assignments Completed"
-            value={dashboardData?.completedAssignments || 0}
-            color="bg-sky-600"
-          />
-          <InfoCard
-            icon={<LuGraduationCap size={26} />}
-            label="Average Grade"
-            value={dashboardData?.averageGrade || 0}
-            color="bg-purple-600"
-          />
+      <div className="my-5 mx-auto space-y-8">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-semibold">
+            Welcome back, {user?.fullName?.split(" ")[0] || "Student"}!
+          </h2>
+          <p className="text-sm text-gray-700">
+            Here's a summary of your academic progress
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          {/* Upcoming Assignments List */}
-          <UpcomingAssignments
-            assignments={dashboardData?.UpcomingAssignments}
-            onSeeMore={() => navigate("/Assignments")}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <UpcomingAssignments
+              upcomingAssignments={upcomingAssignments}
+              navigate={navigate}
+              formatDate={formatDate}
+            />
 
-          {/* Assignments Overview Chart */}
-          <AssignmentsOverview
-            completedAssignments={dashboardData?.completedAssignments || 0}
-            pendingAssignments={dashboardData?.pendingAssignments || 0}
-            overdueAssignments={dashboardData?.overdueAssignments || 0}
-          />
+            <CourseOverview
+              courseGrades={courseGrades}
+              navigate={navigate}
+              getGradeColor={getGradeColor}
+            />
+          </div>
 
-          {/* Assignment Details*/}
-          <AssignmentDetails
-            assignments={dashboardData?.last30DaysAssignments?.assignments}
-            onSeeMore={() => navigate("/assignments")}
-          />
+          <div className="space-y-6">
+            <OverallGPA overallGPA={overallGPA} />
 
-          {/* Grades Over Time Chart*/}
-          <GradesOverTime data={dashboardData?.last30DaysGrades?.grades} />
-
-          {/* Grade Distribution Chart */}
-          <GradesDistribution
-            data={dashboardData?.last365DaysGrades?.slice(0, 4) || []}
-            totalGrades={dashboardData?.totalGrades || 0}
-          />
-
-          {/* Grades Per Course */}
-          <GradesPerCourse
-            grades={dashboardData?.last60DaysGrades?.grades}
-            onSeeMore={() => navigate("/grades")}
-          />
+            <RecentGrades
+              recentGrades={recentGrades}
+              navigate={navigate}
+              getGradeColor={getGradeColor}
+            />
+          </div>
         </div>
       </div>
     </DashboardLayout>
   );
 };
-export default Home;
+
+export default Dashboard;

@@ -1,14 +1,14 @@
 import React from "react";
 import authGraph from "../../assets/images/auth-graph.png";
 import { LuTrendingUpDown } from "react-icons/lu";
-import logo from "../../../../../assets/logo.png";
+import logo from "../../../../../assets/new-logo.svg";
 
 const AuthLayout = ({ children }) => {
   return (
     <div className="flex">
       <div className="w-screen h-screen md:w-[60vw] px-12 pt-8 pb-12">
         <div className="flex items-center gap-2">
-          <img src={logo} alt="Logo" className="w-7 h-7" />
+          <img src={logo} alt="Logo" className="w-8 h-8" />
           <h2 className="text-lg font-medium text-black">Grade Tracker</h2>
         </div>
         {children}

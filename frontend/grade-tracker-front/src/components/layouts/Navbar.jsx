@@ -4,7 +4,7 @@ import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import { UserContext } from "../../context/userContext";
 import SideMenu from "./SideMenu";
 import CharAvatar from "../Cards/CharAvatar";
-import logo from "../../../../../assets/logo.png";
+import logo from "../../../../../assets/new-logo.svg";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import {
@@ -123,7 +123,7 @@ const Navbar = ({ activeMenu }) => {
 
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <img src={logo} alt="Logo" className="w-7 h-7" />
+          <img src={logo} alt="Logo" className="w-8 h-8" />
           <h2 className="text-lg font-medium text-black">Grade Tracker</h2>
         </div>
       </div>

@@ -41,7 +41,7 @@ export const prepareCoursesBarChartData = (courses = [], groupBy = "term") => {
   return chartData;
 };
 
-// Prepare Grades bar chart data - Group by course and calculate average score
+// Prepare Grades line chart data - Group by course and calculate average score
 export const prepareGradesBarChartData = (grades = []) => {
   if (!Array.isArray(grades) || grades.length === 0) return [];
 
@@ -141,4 +141,39 @@ export const generateCourseColors = (courses = []) => {
   });
 
   return courseColors;
+};
+
+// Get letter grade from percentage
+export const getLetterGrade = (percentage) => {
+  if (percentage >= 90) return "A";
+  if (percentage >= 80) return "B";
+  if (percentage >= 70) return "C";
+  if (percentage >= 60) return "D";
+  if (percentage > 0) return "F";
+  return "N/A";
+};
+
+// Calculate overall GPA from grades (on 4.0 scale)
+export const calculateOverallGPA = (grades = []) => {
+  if (!Array.isArray(grades) || grades.length === 0) return 0;
+
+  const gradeToGPA = (percentage) => {
+    if (percentage >= 90) return 4.0;
+    if (percentage >= 80) return 3.0;
+    if (percentage >= 70) return 2.0;
+    if (percentage >= 60) return 1.0;
+    return 0.0;
+  };
+
+  let totalGradePoints = 0;
+  let totalWeight = 0;
+
+  grades.forEach((grade) => {
+    const gpa = gradeToGPA(Number(grade.score) || 0);
+    const weight = Number(grade.weight) || 0;
+    totalGradePoints += gpa * weight;
+    totalWeight += weight;
+  });
+
+  return totalWeight > 0 ? totalGradePoints / totalWeight : 0;
 };
