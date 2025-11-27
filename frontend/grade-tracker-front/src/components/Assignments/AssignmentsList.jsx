@@ -40,26 +40,12 @@ const AssignmentsList = ({
   }, [assignments, search, statusFilter, courseFilter]);
 
   return (
-    <div className="card">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="">
-          <h5 className="text-lg">Assignments Overview</h5>
-          <p className="text-xs text-gray-400 mt-0.5">
-            Keep track of all your assignments
-          </p>
-        </div>
-
-        <button className="add-btn" onClick={onAddAssignment}>
-          <LuPlus className="text-lg" /> Add Assignment
-        </button>
-      </div>
-
+    <div className="">
       {/* Search & Filters */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Search Input */}
         <div>
-          <label className="text-[13px] text-slate-800 block mb-2">
+          <label className="text-[14px] text-slate-800 block mb-2">
             Search
           </label>
           <input
@@ -67,19 +53,19 @@ const AssignmentsList = ({
             placeholder="Search assignments..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-transparent border border-gray-300 rounded px-3 py-2 outline-none text-sm"
+            className="w-full bg-white border border-gray-300 rounded px-3 py-2 outline-none text-sm"
           />
         </div>
 
         {/* Status Filter */}
         <div>
-          <label className="text-[13px] text-slate-800 block mb-2">
+          <label className="text-[14px] text-slate-800 block mb-2">
             Filter by Status
           </label>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full bg-transparent border border-gray-300 rounded px-3 py-2 outline-none text-sm"
+            className="w-full bg-white border border-gray-300 rounded px-3 py-2 outline-none text-sm"
           >
             <option value="">All Statuses</option>
             <option value="Pending">Pending</option>
@@ -89,13 +75,13 @@ const AssignmentsList = ({
 
         {/* Course Filter */}
         <div>
-          <label className="text-[13px] text-slate-800 block mb-2">
+          <label className="text-[14px] text-slate-800 block mb-2">
             Filter by Course
           </label>
           <select
             value={courseFilter}
             onChange={(e) => setCourseFilter(e.target.value)}
-            className="w-full bg-transparent border border-gray-300 rounded px-3 py-2 outline-none text-sm"
+            className="w-full bg-white border border-gray-300 rounded px-3 py-2 outline-none text-sm"
           >
             <option value="">All Courses</option>
             {uniqueCourses.map((course) => (

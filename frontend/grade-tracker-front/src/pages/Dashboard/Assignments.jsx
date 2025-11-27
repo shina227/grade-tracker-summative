@@ -9,6 +9,7 @@ import EditAssignmentForm from "../../components/Assignments/EditAssignmentForm"
 import Modal from "../../components/Modal.jsx";
 import AssignmentsList from "../../components/Assignments/AssignmentsList.jsx";
 import DeleteAlert from "../../components/DeleteAlert";
+import { LuPlus } from "react-icons/lu";
 
 const Assignments = () => {
   useUserAuth();
@@ -193,7 +194,24 @@ const Assignments = () => {
 
   return (
     <DashboardLayout activeMenu="Assignments">
-      <div className="my-5 mx-auto">
+      <div className="my-5 mx-auto space-y-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="space-y-1">
+            <h5 className="text-lg">Assignments Overview</h5>
+            <p className="text-xs text-gray-600">
+              Keep track of all your assignments
+            </p>
+          </div>
+
+          <button
+            className="add-btn"
+            onClick={() => setOpenAddAssignmentModal(true)}
+          >
+            <LuPlus className="text-lg" /> Add Assignment
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 gap-6">
           {/* Assignments List */}
           <AssignmentsList

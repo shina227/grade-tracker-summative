@@ -1,5 +1,5 @@
 import React from "react";
-import { LuBookOpen, LuArrowRight } from "react-icons/lu";
+import { LuClipboardList, LuArrowRight } from "react-icons/lu";
 
 const UpcomingAssignments = ({ upcomingAssignments, navigate, formatDate }) => {
   return (
@@ -23,7 +23,7 @@ const UpcomingAssignments = ({ upcomingAssignments, navigate, formatDate }) => {
             >
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 flex items-center justify-center bg-white rounded border border-gray-200">
-                  <LuBookOpen className="text-gray-600" size={20} />
+                  <LuClipboardList className="text-gray-600" size={20} />
                 </div>
 
                 <div>

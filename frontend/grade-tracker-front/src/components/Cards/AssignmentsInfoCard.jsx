@@ -2,10 +2,10 @@ import React from "react";
 import {
   LuTrash2,
   LuPencil,
-  LuBookOpen,
   LuCircleCheck,
   LuClock,
   LuCalendar,
+  LuClipboardList,
 } from "react-icons/lu";
 
 const AssignmentsInfoCard = ({
@@ -77,10 +77,10 @@ const AssignmentsInfoCard = ({
   const dueDateStatus = getDueDateStatus();
 
   return (
-    <div className="group flex items-start justify-between gap-4 p-4 rounded-lg hover:bg-gray-100 transition-colors border border-gray-100">
+    <div className="group flex items-start justify-between gap-4 p-4 rounded-lg bg-white hover:bg-gray-100 transition-colors border border-gray-100 cursor-pointer">
       {/* Left side*/}
       <div className="w-10 h-10 shrink-0 flex items-center justify-center text-lg text-gray-700 bg-gray-50 rounded-full">
-        <LuBookOpen />
+        <LuClipboardList />
       </div>
 
       {/* Middle*/}
