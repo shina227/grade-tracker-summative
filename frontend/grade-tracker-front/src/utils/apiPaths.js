@@ -29,6 +29,7 @@ export const API_PATHS = {
   GRADES: {
     ADD_GRADE: "/api/v1/grades/add",
     GET_ALL_GRADES: "/api/v1/grades/get",
+    GENERATE_PDF: "/api/v1/grades/report",
     UPDATE_GRADE: (gradeId) => `/api/v1/grades/${gradeId}`,
     DELETE_GRADE: (gradeId) => `/api/v1/grades/${gradeId}`,
   },

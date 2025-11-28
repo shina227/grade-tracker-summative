@@ -11,6 +11,7 @@ import {
 } from "../../utils/helper";
 import GradeDistributionChart from "../../components/Grades/GradeDistributionChart";
 import GPATrendChart from "../../components/Grades/GPATrendChart";
+import { filterByTimeRange } from "../../utils/helper";
 
 const Grades = () => {
   useUserAuth();
@@ -18,7 +19,8 @@ const Grades = () => {
   const [gradesData, setGradesData] = useState([]);
   const [coursesData, setCoursesData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [timeRange, setTimeRange] = useState("semester"); // semester, year, all, custom
+  const [timeRange, setTimeRange] = useState("semester");
+  const filteredGrades = filterByTimeRange(gradesData, timeRange);
 
   // Fetch data
   useEffect(() => {
@@ -43,20 +45,23 @@ const Grades = () => {
   }, []);
 
   // Calculate GPA stats
-  const overallGPA = calculateOverallGPA(gradesData);
+  const overallGPA = calculateOverallGPA(filteredGrades);
 
   // Calculate semester GPA (mock - would need actual semester filter)
   const semesterGPA = calculateOverallGPA(gradesData);
 
   // Calculate total credits
-  const totalCredits = gradesData.reduce((sum, g) => sum + (g.weight || 0), 0);
+  const totalCredits = filteredGrades.reduce(
+    (sum, g) => sum + (g.weight || 0),
+    0
+  );
 
   // Calculate grade distribution
-  const gradeDistribution = calculateGradeDistribution(gradesData);
+  const gradeDistribution = calculateGradeDistribution(filteredGrades);
 
   // Calculate course breakdown
   const courseBreakdown = coursesData.map((course) => {
-    const courseGrades = gradesData.filter(
+    const courseGrades = filteredGrades.filter(
       (g) => g.courseId?._id === course._id || g.courseId === course._id
     );
 
@@ -87,9 +92,30 @@ const Grades = () => {
   });
 
   // Generate report
-  const handleGenerateReport = () => {
-    // Mock report generation
-    alert("Report generation feature coming soon!");
+  const handleGenerateReport = async () => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.GRADES.GENERATE_PDF, {
+        responseType: "blob",
+      });
+
+      // Create a blob from the PDF stream
+      const pdfBlob = new Blob([response.data], { type: "application/pdf" });
+
+      // Create a temporary download link
+      const url = window.URL.createObjectURL(pdfBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "grades_report.pdf";
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Failed to generate report.");
+    }
   };
 
   return (
@@ -105,7 +131,7 @@ const Grades = () => {
           </div>
           <button
             onClick={handleGenerateReport}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-colors text-[13px] cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition-colors text-[13px] cursor-pointer"
           >
             <LuDownload size={16} />
             Generate Report
@@ -132,7 +158,7 @@ const Grades = () => {
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
-            Last Year
+            This Year
           </button>
           <button
             onClick={() => setTimeRange("all")}
@@ -143,16 +169,6 @@ const Grades = () => {
             }`}
           >
             All Time
-          </button>
-          <button
-            onClick={() => setTimeRange("custom")}
-            className={`px-4 py-2 rounded-lg text-sm cursor-pointer transition-colors ${
-              timeRange === "custom"
-                ? "bg-indigo-100 text-indigo-700"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            Custom Range 📅
           </button>
         </div>
 
@@ -211,7 +227,7 @@ const Grades = () => {
               </div>
               <p className="text-sm text-gray-500">All Time</p>
             </div>
-            <GPATrendChart grades={gradesData} />
+            <GPATrendChart grades={filteredGrades} />
           </div>
 
           {/* Grade Distribution */}

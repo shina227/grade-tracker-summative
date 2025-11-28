@@ -4,6 +4,7 @@ const {
   getAllGrades,
   updateGrade,
   deleteGrade,
+  generateGradesPDF,
 } = require("../controllers/gradeController");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -13,5 +14,6 @@ router.post("/add", protect, addGrade);
 router.get("/get", protect, getAllGrades);
 router.patch("/:id", protect, updateGrade);
 router.delete("/:id", protect, deleteGrade);
+router.get("/report", protect, generateGradesPDF);
 
 module.exports = router;

@@ -211,3 +211,37 @@ export const calculateGradeDistribution = (grades = []) => {
 
   return distribution;
 };
+
+// Filter grades by time range
+export const filterByTimeRange = (grades = [], timeRange = "all") => {
+  if (!Array.isArray(grades) || grades.length === 0) return grades;
+
+  const now = moment();
+
+  switch (timeRange) {
+    case "semester": {
+      // This semester
+      const threeMonthsAgo = moment().subtract(3, "months");
+      return grades.filter((g) =>
+        moment(g.createdAt).isSameOrAfter(threeMonthsAgo)
+      );
+    }
+
+    case "year": {
+      // This year
+      const currentYear = now.year();
+      const academicYearStart =
+        now.month() >= 4
+          ? moment(`${currentYear}-05-01`)
+          : moment(`${currentYear - 1}-05-01`);
+
+      return grades.filter((g) =>
+        moment(g.createdAt).isSameOrAfter(academicYearStart)
+      );
+    }
+
+    case "all":
+    default:
+      return grades;
+  }
+};
