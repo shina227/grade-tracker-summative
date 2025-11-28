@@ -51,6 +51,10 @@ Link to SRS: https://docs.google.com/document/d/1Y2QF7r1sLqnbP9aBfPJA2Ez1C0v3y2f
 - Node.js
 - Express.js
 
+**Database**
+
+- MongoDB
+
 ## Setup Instructions
 
 Follow these steps to run the project locally on your machine.
@@ -141,7 +145,7 @@ All features are implemented as defined in the SRS document.
 
 ## Author
 
-Atete Mpeta Shina
+Atete Mpeta Shina  
 Software Engineering Student - African Leadership University
 
 ## License
