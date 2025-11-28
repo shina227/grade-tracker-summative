@@ -11,11 +11,11 @@ import Home from "./pages/Dashboard/Home";
 import Courses from "./pages/Dashboard/Courses";
 import Assignments from "./pages/Dashboard/Assignments";
 import Grades from "./pages/Dashboard/Grades";
-import Calendar from "./pages/Dashboard/Calendar";
 import UserProvider from "./context/userContext";
 import { Toaster } from "react-hot-toast";
 import Profile from "./pages/Dashboard/Profile";
 import Settings from "./pages/Dashboard/Settings";
+import Notifications from "./pages/Dashboard/Notifications";
 
 const Root = () => {
   // Check if token exists in localStorage
@@ -42,7 +42,7 @@ const App = () => {
             <Route path="/courses" element={<Courses />} />
             <Route path="/assignments" element={<Assignments />} />
             <Route path="/grades" element={<Grades />} />
-            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/notifications" element={<Notifications />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>

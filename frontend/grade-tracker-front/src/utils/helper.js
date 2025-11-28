@@ -177,3 +177,37 @@ export const calculateOverallGPA = (grades = []) => {
 
   return totalWeight > 0 ? totalGradePoints / totalWeight : 0;
 };
+
+// Calculate grade distribution
+export const calculateGradeDistribution = (grades = []) => {
+  const distribution = {
+    A: 0,
+    AMinus: 0,
+    BPlus: 0,
+    B: 0,
+    BMinus: 0,
+    CPlus: 0,
+    totalAs: 0,
+  };
+
+  grades.forEach((grade) => {
+    const score = Number(grade.score) || 0;
+    if (score >= 93) {
+      distribution.A++;
+      distribution.totalAs++;
+    } else if (score >= 90) {
+      distribution.AMinus++;
+      distribution.totalAs++;
+    } else if (score >= 87) {
+      distribution.BPlus++;
+    } else if (score >= 83) {
+      distribution.B++;
+    } else if (score >= 80) {
+      distribution.BMinus++;
+    } else if (score >= 77) {
+      distribution.CPlus++;
+    }
+  });
+
+  return distribution;
+};

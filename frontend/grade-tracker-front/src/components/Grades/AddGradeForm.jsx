@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Input from "../Inputs/Input";
+import { API_PATHS } from "../../utils/apiPaths";
+import axiosInstance from "../../utils/axiosInstance";
 
-const AddGradeForm = ({ courses = [], assignments = [], onAddGrade }) => {
+const AddGradeForm = ({ courses = [], onAddGrade }) => {
   const [grade, setGrade] = useState({
     courseId: "",
     assignmentId: "",
@@ -9,13 +11,31 @@ const AddGradeForm = ({ courses = [], assignments = [], onAddGrade }) => {
     weight: "",
   });
 
+  const [filteredAssignments, setFilteredAssignments] = useState([]);
+
   const handleChange = (key, value) => setGrade({ ...grade, [key]: value });
 
-  // Filter assignments based on selected course
-  const filteredAssignments = useMemo(() => {
-    if (!grade.courseId) return [];
-    return assignments.filter((a) => a.courseId === grade.courseId);
-  }, [grade.courseId, assignments]);
+  // Fetch assignments for selected course
+  useEffect(() => {
+    if (!grade.courseId) {
+      setFilteredAssignments([]);
+      return;
+    }
+
+    const fetchAssignments = async () => {
+      try {
+        const response = await axiosInstance.get(
+          API_PATHS.ASSIGNMENTS.GET_BY_COURSE(grade.courseId)
+        );
+        setFilteredAssignments(response.data);
+      } catch (error) {
+        console.error("Error fetching assignments for course:", error);
+        setFilteredAssignments([]);
+      }
+    };
+
+    fetchAssignments();
+  }, [grade.courseId]);
 
   const handleSubmit = () => {
     onAddGrade({

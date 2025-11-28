@@ -21,6 +21,7 @@ export const API_PATHS = {
   ASSIGNMENTS: {
     ADD_ASSIGNMENT: "/api/v1/assignments/add",
     GET_ALL_ASSIGNMENTS: "/api/v1/assignments/get",
+    GET_BY_COURSE: (courseId) => `/api/v1/assignments/course/${courseId}`,
     UPDATE_ASSIGNMENT: (assignmentId) => `/api/v1/assignments/${assignmentId}`,
     DELETE_ASSIGNMENT: (assignmentId) => `/api/v1/assignments/${assignmentId}`,
   },

@@ -5,6 +5,7 @@ import {
   LuCalendar,
   LuLogOut,
   LuChartColumn,
+  LuBell,
 } from "react-icons/lu";
 
 export const SIDE_MENU_DATA = [
@@ -35,8 +36,8 @@ export const SIDE_MENU_DATA = [
   },
   {
     id: "05",
-    label: "Calendar",
-    icon: LuCalendar,
-    path: "/calendar",
+    label: "Notifications",
+    icon: LuBell,
+    path: "/notifications",
   },
 ];
