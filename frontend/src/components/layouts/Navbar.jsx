@@ -4,7 +4,7 @@ import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import { UserContext } from "../../context/userContext";
 import SideMenu from "./SideMenu";
 import CharAvatar from "../Cards/CharAvatar";
-import logo from "../../../../../assets/new-logo.svg";
+import logo from "../../../../assets/new-logo.svg";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { LuBell, LuUser, LuSettings, LuLogOut } from "react-icons/lu";

@@ -1,7 +1,7 @@
 import React from "react";
 import authGraph from "../../assets/images/auth-graph.png";
 import { LuTrendingUpDown } from "react-icons/lu";
-import logo from "../../../../../assets/new-logo.svg";
+import logo from "../../../../assets/new-logo.svg";
 
 const AuthLayout = ({ children }) => {
   return (
