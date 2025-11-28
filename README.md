@@ -32,7 +32,7 @@ The system is designed according to the SRS document and mirrors the actors, pro
 
 ## Live Demo
 
-Deployed Application: https://your-live-url-here.com
+Deployed Application: https://grade-tracker-summative-pccp.vercel.app/
 
 ## SRS Document
 
