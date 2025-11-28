@@ -145,7 +145,7 @@ All features are implemented as defined in the SRS document.
 
 ## Author
 
-Atete Mpeta Shina  
+Atete Mpeta Shina
 Software Engineering Student - African Leadership University
 
 ## License
