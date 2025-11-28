@@ -96,7 +96,7 @@ const Notifications = () => {
           diffDays > 1 ? "s" : ""
         }`;
         icon = <LuCalendar size={20} />;
-        color = "text-blue-600 bg-blue-50 border-blue-200";
+        color = "text-indigo-600 bg-indigo-50 border-indigo-200";
       }
 
       if (message) {
@@ -187,16 +187,16 @@ const Notifications = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={markAllAsRead}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 text-[13px] text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
             >
-              <LuCheck size={18} />
+              <LuCheck size={16} />
               Mark All Read
             </button>
             <button
               onClick={clearAllNotifications}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 text-[13px] text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors cursor-pointer"
             >
-              <LuTrash2 size={18} />
+              <LuTrash2 size={16} />
               Clear All
             </button>
           </div>
@@ -206,12 +206,12 @@ const Notifications = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="card">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg">
-                <LuBell size={20} />
+              <div className="w-12 h-12 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-lg">
+                <LuBell size={18} />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total</p>
-                <p className="text-2xl font-semibold text-gray-900">
+                <p className="text-[14px] text-gray-600">Total</p>
+                <p className="text-xl font-semibold text-gray-900">
                   {notifications.length}
                 </p>
               </div>
@@ -221,11 +221,11 @@ const Notifications = () => {
           <div className="card">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 flex items-center justify-center bg-orange-100 text-orange-600 rounded-lg">
-                <LuBellOff size={20} />
+                <LuBellOff size={18} />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Unread</p>
-                <p className="text-2xl font-semibold text-gray-900">
+                <p className="text-[14px] text-gray-600">Unread</p>
+                <p className="text-xl font-semibold text-gray-900">
                   {unreadCount}
                 </p>
               </div>
@@ -235,11 +235,11 @@ const Notifications = () => {
           <div className="card">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 flex items-center justify-center bg-red-100 text-red-600 rounded-lg">
-                <LuCircleAlert size={20} />
+                <LuCircleAlert size={18} />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Overdue</p>
-                <p className="text-2xl font-semibold text-gray-900">
+                <p className="text-[14px] text-gray-600">Overdue</p>
+                <p className="text-xl font-semibold text-gray-900">
                   {overdueCount}
                 </p>
               </div>
@@ -258,9 +258,9 @@ const Notifications = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setFilter("all")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                     filter === "all"
-                      ? "bg-blue-100 text-blue-700"
+                      ? "bg-indigo-50 text-indigo-700"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
@@ -268,9 +268,9 @@ const Notifications = () => {
                 </button>
                 <button
                   onClick={() => setFilter("unread")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                     filter === "unread"
-                      ? "bg-blue-100 text-blue-700"
+                      ? "bg-indigo-50 text-indigo-700"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
@@ -278,9 +278,9 @@ const Notifications = () => {
                 </button>
                 <button
                   onClick={() => setFilter("read")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                     filter === "read"
-                      ? "bg-blue-100 text-blue-700"
+                      ? "bg-indigo-50 text-indigo-700"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
@@ -297,9 +297,9 @@ const Notifications = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCategoryFilter("all")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                     categoryFilter === "all"
-                      ? "bg-blue-100 text-blue-700"
+                      ? "bg-indigo-50 text-indigo-700"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
@@ -307,9 +307,9 @@ const Notifications = () => {
                 </button>
                 <button
                   onClick={() => setCategoryFilter("overdue")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                     categoryFilter === "overdue"
-                      ? "bg-blue-100 text-blue-700"
+                      ? "bg-indigo-50 text-indigo-700"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
@@ -317,9 +317,9 @@ const Notifications = () => {
                 </button>
                 <button
                   onClick={() => setCategoryFilter("upcoming")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                     categoryFilter === "upcoming"
-                      ? "bg-blue-100 text-blue-700"
+                      ? "bg-indigo-50 text-indigo-700"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
@@ -327,9 +327,9 @@ const Notifications = () => {
                 </button>
                 <button
                   onClick={() => setCategoryFilter("completed")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                     categoryFilter === "completed"
-                      ? "bg-blue-100 text-blue-700"
+                      ? "bg-indigo-50 text-indigo-700"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
@@ -371,7 +371,7 @@ const Notifications = () => {
                         {notif.message}
                       </p>
                       {!notif.isRead && (
-                        <span className="w-2 h-2 bg-blue-600 rounded-full shrink-0 mt-1.5"></span>
+                        <span className="w-2 h-2 bg-indigo-600 rounded-full shrink-0 mt-1.5"></span>
                       )}
                     </div>
                     <p className="text-xs text-gray-500">{notif.course}</p>
@@ -388,10 +388,10 @@ const Notifications = () => {
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => toggleReadStatus(notif.id)}
-                      className={`p-2 rounded-lg transition-colors ${
+                      className={`p-2 rounded-lg transition-colors cursor-pointer ${
                         notif.isRead
-                          ? "text-gray-400 hover:text-blue-600 hover:bg-blue-50"
-                          : "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          ? "text-gray-400 hover:text-indigo-600 hover:bg-indigo-50"
+                          : "text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
                       }`}
                       title={notif.isRead ? "Mark as unread" : "Mark as read"}
                     >
@@ -399,7 +399,7 @@ const Notifications = () => {
                     </button>
                     <button
                       onClick={() => deleteNotification(notif.id)}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                       title="Delete notification"
                     >
                       <LuTrash2 size={18} />
