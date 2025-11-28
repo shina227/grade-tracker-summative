@@ -1,4 +1,7 @@
-export const BASE_URL = "https://grade-tracker-summative-0o1e.onrender.com";
+export const BASE_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:8000"
+    : "https://grade-tracker-summative-0o1e.onrender.com";
 
 export const API_PATHS = {
   AUTH: {

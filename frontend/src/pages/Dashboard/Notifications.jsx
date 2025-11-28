@@ -178,23 +178,23 @@ const Notifications = () => {
       <div className="my-5 mx-auto max-w-4xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">Notifications</h1>
-            <p className="text-gray-500 mt-1">
+          <div className="space-y-1">
+            <h1 className="text-lg">Notifications</h1>
+            <p className="text-xs text-gray-600">
               Stay updated with your assignments and deadlines
             </p>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={markAllAsRead}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
             >
               <LuCheck size={18} />
               Mark All Read
             </button>
             <button
               onClick={clearAllNotifications}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors cursor-pointer"
             >
               <LuTrash2 size={18} />
               Clear All
@@ -207,11 +207,11 @@ const Notifications = () => {
           <div className="card">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg">
-                <LuBell size={24} />
+                <LuBell size={20} />
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-semibold text-gray-900">
                   {notifications.length}
                 </p>
               </div>
@@ -221,11 +221,11 @@ const Notifications = () => {
           <div className="card">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 flex items-center justify-center bg-orange-100 text-orange-600 rounded-lg">
-                <LuBellOff size={24} />
+                <LuBellOff size={20} />
               </div>
               <div>
                 <p className="text-sm text-gray-600">Unread</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-semibold text-gray-900">
                   {unreadCount}
                 </p>
               </div>
@@ -235,11 +235,11 @@ const Notifications = () => {
           <div className="card">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 flex items-center justify-center bg-red-100 text-red-600 rounded-lg">
-                <LuCircleAlert size={24} />
+                <LuCircleAlert size={20} />
               </div>
               <div>
                 <p className="text-sm text-gray-600">Overdue</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-semibold text-gray-900">
                   {overdueCount}
                 </p>
               </div>
