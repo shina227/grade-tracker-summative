@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const Assignment = require("../models/Assignments");
 const Course = require("../models/Courses");
+const Grade = require("../models/Grades");
 
 // Add Assignment
 exports.addAssignment = async (req, res) => {
@@ -31,9 +32,20 @@ exports.addAssignment = async (req, res) => {
 
     await assignment.save();
 
-    // Optionally push to course.assignments array
     course.assignments.push(assignment._id);
     await course.save();
+
+    // create a grade record if grade is provided
+    if (grade !== undefined) {
+      const newGrade = new Grade({
+        userId: req.user.id,
+        courseId,
+        assignmentId: assignment._id,
+        score: grade,
+        weight: weight || 0,
+      });
+      await newGrade.save();
+    }
 
     res.status(200).json(assignment);
   } catch (error) {
@@ -74,13 +86,41 @@ exports.getAssignmentsByCourse = async (req, res) => {
 // Update assignment
 exports.updateAssignment = async (req, res) => {
   try {
-    const assignment = await Assignment.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const assignment = await Assignment.findById(req.params.id);
     if (!assignment)
       return res.status(404).json({ message: "Assignment not found" });
+
+    // update fields
+    const { title, description, dueDate, grade, weight, status } = req.body;
+    if (title !== undefined) assignment.title = title;
+    if (description !== undefined) assignment.description = description;
+    if (dueDate !== undefined) assignment.dueDate = dueDate;
+    if (status !== undefined) assignment.status = status;
+    if (grade !== undefined) assignment.grade = grade;
+    if (weight !== undefined) assignment.weight = weight;
+
+    await assignment.save();
+
+    // Update or create corresponding grade
+    if (grade !== undefined) {
+      const existingGrade = await Grade.findOne({
+        assignmentId: assignment._id,
+      });
+      if (existingGrade) {
+        existingGrade.score = grade;
+        existingGrade.weight = weight || existingGrade.weight;
+        await existingGrade.save();
+      } else {
+        const newGrade = new Grade({
+          userId: assignment.userId,
+          courseId: assignment.courseId,
+          assignmentId: assignment._id,
+          score: grade,
+          weight: weight || 0,
+        });
+        await newGrade.save();
+      }
+    }
 
     res.json(assignment);
   } catch (error) {

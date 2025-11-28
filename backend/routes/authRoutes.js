@@ -4,6 +4,8 @@ const {
   registerUser,
   loginUser,
   getUserInfo,
+  updateUserInfo,
+  changePassword,
 } = require("../controllers/authController");
 const upload = require("../middleware/uploadMiddleware");
 
@@ -22,5 +24,7 @@ router.post("/upload-image", upload.single("image"), (req, res) => {
   }`;
   res.status(200).json({ imageUrl });
 });
+router.put("/update-user", protect, updateUserInfo);
+router.put("/change-password", protect, changePassword);
 
 module.exports = router;

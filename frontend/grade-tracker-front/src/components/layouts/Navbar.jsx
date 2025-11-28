@@ -7,13 +7,7 @@ import CharAvatar from "../Cards/CharAvatar";
 import logo from "../../../../../assets/new-logo.svg";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
-import {
-  LuBell,
-  LuCalendar,
-  LuUser,
-  LuSettings,
-  LuLogOut,
-} from "react-icons/lu";
+import { LuBell, LuUser, LuSettings, LuLogOut } from "react-icons/lu";
 import { getInitials } from "../../utils/helper";
 
 const Navbar = ({ activeMenu }) => {
@@ -173,7 +167,7 @@ const Navbar = ({ activeMenu }) => {
                           className="mb-2 p-2 bg-red-50 border border-red-200 rounded cursor-pointer hover:bg-red-100 transition-colors"
                           onClick={() => {
                             setShowNotifications(false);
-                            navigate("/calendar");
+                            navigate("/notifications");
                           }}
                         >
                           <p className="text-sm font-medium text-gray-800 truncate">
@@ -202,7 +196,7 @@ const Navbar = ({ activeMenu }) => {
                           className="mb-2 p-2 bg-orange-50 border border-orange-200 rounded cursor-pointer hover:bg-orange-100 transition-colors"
                           onClick={() => {
                             setShowNotifications(false);
-                            navigate("/calendar");
+                            navigate("/notifications");
                           }}
                         >
                           <p className="text-sm font-medium text-gray-800 truncate">
@@ -228,7 +222,7 @@ const Navbar = ({ activeMenu }) => {
                           className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded cursor-pointer hover:bg-blue-100 transition-colors"
                           onClick={() => {
                             setShowNotifications(false);
-                            navigate("/calendar");
+                            navigate("/notifications");
                           }}
                         >
                           <p className="text-sm font-medium text-gray-800 truncate">
@@ -245,17 +239,16 @@ const Navbar = ({ activeMenu }) => {
                     </div>
                   )}
 
-                  {/* View Calendar Link */}
+                  {/* View notifications Link */}
                   <div className="px-4 py-2 border-t border-gray-200">
                     <button
                       onClick={() => {
                         setShowNotifications(false);
-                        navigate("/calendar");
+                        navigate("/notifications");
                       }}
                       className="w-full flex items-center justify-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium py-2 cursor-pointer"
                     >
-                      <LuCalendar size={16} />
-                      View Calendar
+                      View Notifications
                     </button>
                   </div>
                 </>

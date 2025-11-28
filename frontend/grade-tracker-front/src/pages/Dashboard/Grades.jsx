@@ -47,7 +47,7 @@ const Grades = () => {
   // Calculate GPA stats
   const overallGPA = calculateOverallGPA(filteredGrades);
 
-  // Calculate semester GPA (mock - would need actual semester filter)
+  // Calculate semester GPA (mock)
   const semesterGPA = calculateOverallGPA(gradesData);
 
   // Calculate total credits
@@ -87,7 +87,6 @@ const Grades = () => {
       averageGrade: averageGrade,
       letterGrade: getLetterGrade(averageGrade),
       percentage: averageGrade,
-      instructor: "Instructor", // Mock data
     };
   });
 

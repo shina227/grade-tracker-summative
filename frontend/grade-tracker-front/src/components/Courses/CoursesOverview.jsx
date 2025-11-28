@@ -13,23 +13,17 @@ const CoursesOverview = ({ courses, onAddCourse }) => {
     return () => {};
   }, [courses]);
   return (
-    <div className="card">
-      <div className="flex items-center justify-between">
-        <div className="">
-          <h5 className="text-lg">Course Overview</h5>
-          <p className="text-xs text-gray-400 mt-0.5">
-            Keep track of your enrolled courses
-          </p>
-        </div>
-
-        <button className="add-btn" onClick={onAddCourse}>
-          <LuPlus className="text-lg" /> Add Course
-        </button>
+    <div className="flex items-center justify-between">
+      <div className="space-y-1">
+        <h5 className="text-lg">Course Overview</h5>
+        <p className="text-xs text-gray-600">
+          Keep track of your enrolled courses
+        </p>
       </div>
 
-      <div className="mt-10">
-        <CustomBarChart data={chartData} />
-      </div>
+      <button className="add-btn" onClick={onAddCourse}>
+        <LuPlus className="text-lg" /> Add Course
+      </button>
     </div>
   );
 };

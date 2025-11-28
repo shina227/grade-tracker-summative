@@ -8,12 +8,12 @@ import {
 } from "@/components/ui/chart";
 
 const GPATrendChart = ({ grades }) => {
-  // Mock data for the trend line - in real app, group by semester/term
+  // Mock data for now
   const chartData = [
-    { semester: "Fall '22", gpa: 3.65 },
-    { semester: "Spring '23", gpa: 3.72 },
-    { semester: "Fall '23", gpa: 3.58 },
-    { semester: "Spring '24", gpa: 3.85 },
+    { semester: "September 2024", gpa: 3.65 },
+    { semester: "January 2025", gpa: 3.72 },
+    { semester: "May 2025", gpa: 3.58 },
+    { semester: "September 2025", gpa: 3.85 },
   ];
 
   const chartConfig = {

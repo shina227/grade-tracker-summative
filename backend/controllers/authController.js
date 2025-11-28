@@ -80,3 +80,59 @@ exports.getUserInfo = async (req, res) => {
       .json({ message: "Error registering user", error: err.message });
   }
 };
+
+// Update User Info (name or email)
+exports.updateUserInfo = async (req, res) => {
+  const { fullName, email } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (fullName) user.fullName = fullName;
+    if (email) {
+      // Check if email is already in use
+      const emailExists = await User.findOne({ email });
+      if (emailExists && emailExists.id !== req.user.id) {
+        return res.status(400).json({ message: "Email already in use" });
+      }
+      user.email = email;
+    }
+
+    await user.save();
+    res.status(200).json({ message: "User info updated", user });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error updating user info", error: err.message });
+  }
+};
+
+// Change Password
+exports.changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res
+      .status(400)
+      .json({ message: "Both current and new passwords are required" });
+  }
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch)
+      return res.status(400).json({ message: "Current password is incorrect" });
+
+    user.password = newPassword; // Will be hashed by pre-save middleware
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error changing password", error: err.message });
+  }
+};
