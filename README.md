@@ -32,7 +32,7 @@ The system is designed according to the SRS document and mirrors the actors, pro
 
 ## Live Demo
 
-Deployed Application: https://grade-tracker-summative-pccp.vercel.app/
+Deployed Application: https://grade-tracker-summative-pccp.vercel.app/login
 
 ## SRS Document
 
@@ -151,3 +151,4 @@ Software Engineering Student - African Leadership University
 ## License
 
 This project is for academic purposes.
+
