@@ -7,62 +7,48 @@ exports.getDashboardData = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Total Courses
-    const totalCourses = await Course.countDocuments({ userId });
-
-    // Total Assignments
-    const totalAssignments = await Assignment.countDocuments({ userId });
-
-    // Average Grade
-    const grades = await Grade.find({ userId });
-    const averageGrade =
-      grades.length > 0
-        ? grades.reduce((sum, g) => sum + g.score, 0) / grades.length
-        : 0;
-
-    // Completed vs In-progress courses
-    const completedCourses = await Course.countDocuments({
-      userId,
-      status: "Completed",
-    });
-    const inProgressCourses = await Course.countDocuments({
-      userId,
-      status: "In Progress",
-    });
-
-    // Upcoming assignments (next 30 days)
     const now = new Date();
-    const next30Days = new Date();
-    next30Days.setDate(now.getDate() + 30);
+    const next7Days = new Date();
+    next7Days.setDate(now.getDate() + 7);
 
-    const upcomingAssignments = await Assignment.find({
+    // Courses
+    const activeCourses = await Course.countDocuments({
       userId,
-      dueDate: { $gte: now, $lte: next30Days },
-    }).sort({ dueDate: 1 });
+      status: { $ne: "Completed" },
+    });
 
-    // Completed, Pending, Overdue assignment counts
+    // Assignments (all)
     const allAssignments = await Assignment.find({ userId });
-    const completedAssignments = allAssignments.filter(
-      (a) => a.status === "Completed"
-    ).length;
+
     const pendingAssignments = allAssignments.filter(
       (a) => a.status === "Pending"
     ).length;
-    const overdueAssignments = allAssignments.filter(
-      (a) => a.status !== "Completed" && a.dueDate && a.dueDate < now
+
+    const assignmentsDueThisWeek = allAssignments.filter(
+      (a) =>
+        a.dueDate &&
+        a.dueDate >= now &&
+        a.dueDate <= next7Days &&
+        a.status !== "Completed"
     ).length;
 
-    // Final dashboard summary
-    res.status(200).json({
-      totalCourses,
-      totalAssignments,
-      averageGrade: averageGrade.toFixed(2),
-      completedCourses,
-      inProgressCourses,
-      upcomingAssignments,
-      completedAssignments,
+    // Grades
+    const grades = await Grade.find({ userId });
+
+    const averageGrade =
+      grades.length > 0
+        ? Number(
+            (
+              grades.reduce((sum, g) => sum + g.score, 0) / grades.length
+            ).toFixed(2)
+          )
+        : 0;
+
+    return res.status(200).json({
+      activeCourses,
       pendingAssignments,
-      overdueAssignments,
+      averageGrade,
+      assignmentsDueThisWeek,
     });
   } catch (error) {
     console.error("Error getting dashboard data:", error);
