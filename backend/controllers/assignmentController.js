@@ -1,7 +1,7 @@
 const User = require("../models/User");
-const Assignment = require("../models/Assignments");
-const Course = require("../models/Courses");
-const Grade = require("../models/Grades");
+const Assignment = require("../models/Assignment");
+const Course = require("../models/Course");
+const Grade = require("../models/Grade");
 
 // Add Assignment
 exports.addAssignment = async (req, res) => {

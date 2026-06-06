@@ -1,7 +1,7 @@
 const PDFDocument = require("pdfkit");
-const Grades = require("../models/Grades");
-const Courses = require("../models/Courses");
-const Assignments = require("../models/Assignments");
+const Grades = require("../models/Grade");
+const Courses = require("../models/Course");
+const Assignments = require("../models/Assignment");
 
 // Add Grade
 exports.addGrade = async (req, res) => {
