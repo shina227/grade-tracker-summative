@@ -1,9 +1,9 @@
-const Course = require("../models/Courses");
-const Assignment = require("../models/Assignments");
-const Grade = require("../models/Grades");
+const Course = require("../models/Course");
+const Assignment = require("../models/Assignment");
+const Grade = require("../models/Grade");
 
-// Get Dashboard Data
-exports.getDashboardData = async (req, res) => {
+// Get Dashboard Stats (frontend contract)
+exports.getDashboardStats = async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -11,20 +11,20 @@ exports.getDashboardData = async (req, res) => {
     const next7Days = new Date();
     next7Days.setDate(now.getDate() + 7);
 
-    // Courses
+    // Active courses
     const activeCourses = await Course.countDocuments({
       userId,
       status: { $ne: "Completed" },
     });
 
-    // Assignments (all)
-    const allAssignments = await Assignment.find({ userId });
+    // Assignments
+    const assignments = await Assignment.find({ userId });
 
-    const pendingAssignments = allAssignments.filter(
+    const pendingAssignments = assignments.filter(
       (a) => a.status === "Pending"
     ).length;
 
-    const assignmentsDueThisWeek = allAssignments.filter(
+    const assignmentsDueThisWeek = assignments.filter(
       (a) =>
         a.dueDate &&
         a.dueDate >= now &&
@@ -51,7 +51,7 @@ exports.getDashboardData = async (req, res) => {
       assignmentsDueThisWeek,
     });
   } catch (error) {
-    console.error("Error getting dashboard data:", error);
+    console.error("Dashboard stats error:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
