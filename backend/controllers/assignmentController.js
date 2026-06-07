@@ -1,141 +1,188 @@
-const User = require("../models/User");
 const Assignment = require("../models/Assignment");
 const Course = require("../models/Course");
-const Grade = require("../models/Grade");
 
-// Add Assignment
-exports.addAssignment = async (req, res) => {
-  const { courseId, title, description, dueDate, grade, weight, status } =
-    req.body;
+/**
+ * DTO mapper (backend → frontend contract)
+ */
+const toAssignmentDTO = (assignment) => ({
+  id: assignment._id.toString(),
+  title: assignment.title,
+  courseId: assignment.courseId?._id?.toString() || assignment.courseId,
+  courseName: assignment.courseId?.title || "Unknown",
+  dueDate: assignment.dueDate.toISOString(),
+  status: assignment.status,
+});
+
+/**
+ * GET /assignments
+ */
+exports.getAssignments = async (req, res) => {
   try {
-    // Check required fields
-    if (!courseId || !title) {
-      return res.status(400).json({ message: "Course and title are required" });
+    const assignments = await Assignment.find({
+      userId: req.user.id,
+    })
+      .populate("courseId", "title")
+      .sort({ dueDate: 1 });
+
+    return res.json(assignments.map(toAssignmentDTO));
+  } catch (error) {
+    console.error("Error fetching assignments:", error);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+/**
+ * GET /assignments/:id
+ */
+exports.getAssignment = async (req, res) => {
+  try {
+    const assignment = await Assignment.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    }).populate("courseId", "title");
+
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found" });
     }
 
-    // Check if course exists
-    const course = await Course.findById(courseId);
+    return res.json(toAssignmentDTO(assignment));
+  } catch (error) {
+    console.error("Error fetching assignment:", error);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+/**
+ * POST /assignments
+ */
+exports.addAssignment = async (req, res) => {
+  try {
+    const { courseId, title, description, dueDate } = req.body;
+
+    if (!courseId || !title || !dueDate) {
+      return res.status(400).json({
+        message: "Course, title, and due date are required",
+      });
+    }
+
+    const course = await Course.findOne({
+      _id: courseId,
+      userId: req.user.id,
+    });
+
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    const assignment = new Assignment({
+    const assignment = await Assignment.create({
+      userId: req.user.id,
       courseId,
       title,
-      description,
+      description: description || "",
       dueDate,
-      weight,
-      grade,
-      status,
+      status: "upcoming",
+    });
+
+    const populated = await Assignment.findById(
+      assignment._id
+    ).populate("courseId", "title");
+
+    return res.status(201).json(toAssignmentDTO(populated));
+  } catch (error) {
+    console.error("Error creating assignment:", error);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+/**
+ * POST /assignments/:id/submit
+ */
+exports.submitAssignment = async (req, res) => {
+  try {
+    const { content, fileUrl } = req.body;
+
+    const assignment = await Assignment.findOne({
+      _id: req.params.id,
       userId: req.user.id,
+    });
+
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found" });
+    }
+
+    assignment.submissionContent = content || "";
+    assignment.fileUrl = fileUrl || "";
+    assignment.submittedAt = new Date();
+    assignment.status = "submitted";
+
+    await assignment.save();
+
+    return res.status(204).send();
+  } catch (error) {
+    console.error("Error submitting assignment:", error);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+/**
+ * PATCH /assignments/:id
+ */
+exports.updateAssignment = async (req, res) => {
+  try {
+    const assignment = await Assignment.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found" });
+    }
+
+    const allowedFields = [
+      "title",
+      "description",
+      "dueDate",
+      "status",
+    ];
+
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        assignment[field] = req.body[field];
+      }
     });
 
     await assignment.save();
 
-    course.assignments.push(assignment._id);
-    await course.save();
+    const populated = await Assignment.findById(
+      assignment._id
+    ).populate("courseId", "title");
 
-    // create a grade record if grade is provided
-    if (grade !== undefined) {
-      const newGrade = new Grade({
-        userId: req.user.id,
-        courseId,
-        assignmentId: assignment._id,
-        score: grade,
-        weight: weight || 0,
-      });
-      await newGrade.save();
-    }
-
-    res.status(200).json(assignment);
-  } catch (error) {
-    console.error("Error adding assignment:", error);
-    res.status(500).json({ message: "Server Error" });
-  }
-};
-
-// Get All Assignments
-exports.getAllAssignments = async (req, res) => {
-  const userId = req.user.id;
-
-  try {
-    const assignments = await Assignment.find({ userId })
-      .populate("courseId", "courseName term year status")
-      .sort({ createdAt: -1 });
-
-    res.json(assignments);
-  } catch (error) {
-    console.error("Error getting assignments:", error);
-    res.status(500).json({ message: "Server Error" });
-  }
-};
-
-// Get assignments for a course
-exports.getAssignmentsByCourse = async (req, res) => {
-  try {
-    const assignments = await Assignment.find({
-      courseId: req.params.courseId,
-    }).sort({ dueDate: 1 });
-    res.json(assignments);
-  } catch (error) {
-    console.error("Error getting assignments:", error);
-    res.status(500).json({ message: "Server Error" });
-  }
-};
-
-// Update assignment
-exports.updateAssignment = async (req, res) => {
-  try {
-    const assignment = await Assignment.findById(req.params.id);
-    if (!assignment)
-      return res.status(404).json({ message: "Assignment not found" });
-
-    // update fields
-    const { title, description, dueDate, grade, weight, status } = req.body;
-    if (title !== undefined) assignment.title = title;
-    if (description !== undefined) assignment.description = description;
-    if (dueDate !== undefined) assignment.dueDate = dueDate;
-    if (status !== undefined) assignment.status = status;
-    if (grade !== undefined) assignment.grade = grade;
-    if (weight !== undefined) assignment.weight = weight;
-
-    await assignment.save();
-
-    // Update or create corresponding grade
-    if (grade !== undefined) {
-      const existingGrade = await Grade.findOne({
-        assignmentId: assignment._id,
-      });
-      if (existingGrade) {
-        existingGrade.score = grade;
-        existingGrade.weight = weight || existingGrade.weight;
-        await existingGrade.save();
-      } else {
-        const newGrade = new Grade({
-          userId: assignment.userId,
-          courseId: assignment.courseId,
-          assignmentId: assignment._id,
-          score: grade,
-          weight: weight || 0,
-        });
-        await newGrade.save();
-      }
-    }
-
-    res.json(assignment);
+    return res.json(toAssignmentDTO(populated));
   } catch (error) {
     console.error("Error updating assignment:", error);
-    res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({ message: "Server Error" });
   }
 };
 
-// Delete assignment
+/**
+ * DELETE /assignments/:id
+ */
 exports.deleteAssignment = async (req, res) => {
   try {
-    await Assignment.findByIdAndDelete(req.params.id);
-    res.json({ message: "Assignment deleted successfully" });
+    const deleted = await Assignment.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Assignment not found" });
+    }
+
+    return res.json({
+      message: "Assignment deleted successfully",
+    });
   } catch (error) {
     console.error("Error deleting assignment:", error);
-    res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({ message: "Server Error" });
   }
 };

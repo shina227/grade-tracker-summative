@@ -13,34 +13,46 @@ const AssignmentSchema = new mongoose.Schema(
       ref: "Course",
       required: true,
     },
+
     title: {
       type: String,
       required: true,
     },
+
     description: {
       type: String,
       default: "",
     },
+
     dueDate: {
       type: Date,
+      required: true,
     },
-    weight: {
-      type: Number,
-      min: 0,
-      max: 100,
-      default: 0,
-    },
-    grade: {
-      type: Number,
-      min: 0,
-      max: 100,
-      default: 0,
-    },
+
     status: {
       type: String,
-      enum: ["Pending", "Completed"],
-      default: "Pending",
+      enum: [
+        "upcoming",
+        "due_soon",
+        "due_tomorrow",
+        "overdue",
+        "submitted",
+        "graded",
+      ],
+      default: "upcoming",
     },
+
+    submissionContent: {
+      type: String,
+      default: "",
+    },
+
+    fileUrl: {
+      type: String,
+      default: "",
+    },
+
+    submittedAt: Date,
   },
   {
     timestamps: true,

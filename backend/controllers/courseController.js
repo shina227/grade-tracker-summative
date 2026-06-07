@@ -1,62 +1,93 @@
 const Course = require("../models/Course");
+const Assignment = require("../models/Assignment");
 
-const toCourseDTO = (course) => {
+// -------------------------
+// DTO MAPPER
+// -------------------------
+const toCourseDTO = async (course) => {
+  const taskCount = await Assignment.countDocuments({
+    courseId: course._id,
+  });
+
   return {
     id: course._id.toString(),
-    title: course.courseName,
-    instructor: "Unknown", // not in DB yet
-    taskCount: course.assignments?.length || 0,
-    progress: course.currentGrade || 0,
+    title: course.title,
+    instructor: course.instructor,
+    taskCount,
+    progress: course.progress,
   };
 };
 
+// -------------------------
 // ADD COURSE
+// -------------------------
 exports.addCourse = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const { courseName, term, year, assignments, currentGrade, status } =
-      req.body;
+    const {
+      title,
+      instructor,
+      term,
+      year,
+      progress,
+      status,
+    } = req.body;
 
-    if (!courseName || !term || !year) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!title) {
+      return res.status(400).json({
+        message: "Title is required",
+      });
     }
 
     const newCourse = new Course({
       userId,
-      courseName,
+      title,
+      instructor,
       term,
       year,
-      assignments: assignments || [],
-      currentGrade: currentGrade || 0,
-      status: status || "In Progress",
+      progress: progress ?? 0,
+      status: status ?? "active",
     });
 
     await newCourse.save();
 
-    return res.status(201).json(toCourseDTO(newCourse));
+    return res.status(201).json(await toCourseDTO(newCourse));
   } catch (error) {
     console.error("Error adding course:", error);
-    return res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({
+      message: "Server Error",
+    });
   }
 };
 
+// -------------------------
 // GET ALL COURSES
+// -------------------------
 exports.getAllCourses = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const courses = await Course.find({ userId }).sort({ createdAt: -1 });
+    const courses = await Course.find({ userId }).sort({
+      createdAt: -1,
+    });
 
-    return res.json(courses.map(toCourseDTO));
+    const courseDTOs = await Promise.all(
+      courses.map(toCourseDTO)
+    );
+
+    return res.json(courseDTOs);
   } catch (error) {
     console.error("Error getting courses:", error);
-    return res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({
+      message: "Server Error",
+    });
   }
 };
 
-
+// -------------------------
 // GET ONE COURSE
+// -------------------------
 exports.getCourse = async (req, res) => {
   const userId = req.user.id;
   const courseId = req.params.id;
@@ -68,67 +99,97 @@ exports.getCourse = async (req, res) => {
     });
 
     if (!course) {
-      return res.status(404).json({ message: "Course not found" });
+      return res.status(404).json({
+        message: "Course not found",
+      });
     }
 
-    return res.json(toCourseDTO(course));
+    return res.json(await toCourseDTO(course));
   } catch (error) {
     console.error("Error getting course:", error);
-    return res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({
+      message: "Server Error",
+    });
   }
 };
 
+// -------------------------
 // UPDATE COURSE
+// -------------------------
 exports.updateCourse = async (req, res) => {
   const userId = req.user.id;
   const courseId = req.params.id;
 
   try {
-    const course = await Course.findById(courseId);
+    const course = await Course.findOne({
+      _id: courseId,
+      userId,
+    });
 
     if (!course) {
-      return res.status(404).json({ message: "Course not found" });
-    }
-
-    if (course.userId.toString() !== userId) {
-      return res.status(403).json({
-        message: "Not authorized to update this course",
+      return res.status(404).json({
+        message: "Course not found",
       });
     }
 
     const updates = {};
+
     const allowedFields = [
-      "courseName",
+      "title",
+      "instructor",
       "term",
       "year",
-      "assignments",
-      "currentGrade",
+      "progress",
       "status",
     ];
 
     allowedFields.forEach((field) => {
-      if (req.body[field] !== undefined) updates[field] = req.body[field];
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
     });
 
     const updatedCourse = await Course.findByIdAndUpdate(
       courseId,
       updates,
-      { new: true }
+      {
+        new: true,
+        runValidators: true,
+      }
     );
 
-    return res.json(toCourseDTO(updatedCourse));
+    return res.json(await toCourseDTO(updatedCourse));
   } catch (error) {
     console.error("Error updating course:", error);
-    return res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({
+      message: "Server Error",
+    });
   }
 };
 
+// -------------------------
 // DELETE COURSE
+// -------------------------
 exports.deleteCourse = async (req, res) => {
   try {
-    await Course.findByIdAndDelete(req.params.id);
-    return res.json({ message: "Course deleted successfully" });
+    const deletedCourse = await Course.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+
+    if (!deletedCourse) {
+      return res.status(404).json({
+        message: "Course not found",
+      });
+    }
+
+    return res.json({
+      message: "Course deleted successfully",
+    });
   } catch (error) {
-    return res.status(500).json({ message: "Server Error" });
+    console.error("Error deleting course:", error);
+    return res.status(500).json({
+      message: "Server Error",
+    });
   }
 };
