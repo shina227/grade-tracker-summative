@@ -12,27 +12,17 @@ const GradeSchema = new mongoose.Schema(
       ref: "Course",
       required: true,
     },
+    // Optional — grade may not always be tied to a tracked assignment
     assignmentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Assignment",
-      required: true,
     },
-    score: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 100,
-    },
-    weight: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 100,
-    },
+    title: { type: String, required: true },   // e.g. "Midterm Exam"
+    score: { type: Number, required: true, min: 0 },
+    maxScore: { type: Number, required: true, min: 1 },
+    gradedAt: { type: Date, default: Date.now },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Grade", GradeSchema);

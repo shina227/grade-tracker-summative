@@ -1,27 +1,13 @@
 const express = require("express");
+const { getGrades, getGrade, createGrade } = require("../controllers/gradeController");
 const { protect } = require("../middleware/authMiddleware");
-
-const {
-  getGrades,
-  getGrade,
-  createGrade,
-} = require("../controllers/gradeController");
 
 const router = express.Router();
 
-/**
- * GET all grades
- */
-router.get("/", protect, getGrades);
+router.use(protect);
 
-/**
- * GET single grade
- */
-router.get("/:id", protect, getGrade);
-
-/**
- * CREATE grade (manual/system use)
- */
-router.post("/", protect, createGrade);
+router.get("/", getGrades);
+router.get("/:id", getGrade);
+router.post("/", createGrade);
 
 module.exports = router;

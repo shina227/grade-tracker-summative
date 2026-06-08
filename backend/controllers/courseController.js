@@ -1,47 +1,70 @@
+const mongoose = require("mongoose");
 const Course = require("../models/Course");
-const Assignment = require("../models/Assignment");
 
-// -------------------------
-// DTO MAPPER
-// -------------------------
-const toCourseDTO = async (course) => {
-  const taskCount = await Assignment.countDocuments({
-    courseId: course._id,
-  });
+// Single aggregation pipeline — fetches courses with taskCount in one DB round-trip
+const coursesWithTaskCount = (matchStage) =>
+  Course.aggregate([
+    { $match: matchStage },
+    {
+      $lookup: {
+        from: "assignments",
+        localField: "_id",
+        foreignField: "courseId",
+        as: "tasks",
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        id: { $toString: "$_id" },
+        title: 1,
+        instructor: 1,
+        progress: 1,
+        taskCount: { $size: "$tasks" },
+      },
+    },
+    { $sort: { createdAt: -1 } },
+  ]);
 
-  return {
-    id: course._id.toString(),
-    title: course.title,
-    instructor: course.instructor,
-    taskCount,
-    progress: course.progress,
-  };
+// GET /courses
+exports.getAllCourses = async (req, res) => {
+  try {
+    const courses = await coursesWithTaskCount({
+      userId: new mongoose.Types.ObjectId(req.user.id),
+    });
+    return res.json(courses);
+  } catch (error) {
+    console.error("Error getting courses:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
 };
 
-// -------------------------
-// ADD COURSE
-// -------------------------
-exports.addCourse = async (req, res) => {
-  const userId = req.user.id;
-
+// GET /courses/:id
+exports.getCourse = async (req, res) => {
   try {
-    const {
-      title,
-      instructor,
-      term,
-      year,
-      progress,
-      status,
-    } = req.body;
+    const [course] = await coursesWithTaskCount({
+      _id: new mongoose.Types.ObjectId(req.params.id),
+      userId: new mongoose.Types.ObjectId(req.user.id),
+    });
 
-    if (!title) {
-      return res.status(400).json({
-        message: "Title is required",
-      });
-    }
+    if (!course) return res.status(404).json({ message: "Course not found" });
 
-    const newCourse = new Course({
-      userId,
+    return res.json(course);
+  } catch (error) {
+    console.error("Error getting course:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// POST /courses
+exports.addCourse = async (req, res) => {
+  try {
+    const { title, instructor, term, year, progress, status } = req.body;
+
+    if (!title) return res.status(400).json({ message: "Title is required" });
+
+    const course = await Course.create({
+      userId: req.user.id,
       title,
       instructor,
       term,
@@ -50,146 +73,54 @@ exports.addCourse = async (req, res) => {
       status: status ?? "active",
     });
 
-    await newCourse.save();
-
-    return res.status(201).json(await toCourseDTO(newCourse));
+    const [courseDTO] = await coursesWithTaskCount({ _id: course._id });
+    return res.status(201).json(courseDTO);
   } catch (error) {
     console.error("Error adding course:", error);
-    return res.status(500).json({
-      message: "Server Error",
-    });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
-// -------------------------
-// GET ALL COURSES
-// -------------------------
-exports.getAllCourses = async (req, res) => {
-  const userId = req.user.id;
-
-  try {
-    const courses = await Course.find({ userId }).sort({
-      createdAt: -1,
-    });
-
-    const courseDTOs = await Promise.all(
-      courses.map(toCourseDTO)
-    );
-
-    return res.json(courseDTOs);
-  } catch (error) {
-    console.error("Error getting courses:", error);
-    return res.status(500).json({
-      message: "Server Error",
-    });
-  }
-};
-
-// -------------------------
-// GET ONE COURSE
-// -------------------------
-exports.getCourse = async (req, res) => {
-  const userId = req.user.id;
-  const courseId = req.params.id;
-
-  try {
-    const course = await Course.findOne({
-      _id: courseId,
-      userId,
-    });
-
-    if (!course) {
-      return res.status(404).json({
-        message: "Course not found",
-      });
-    }
-
-    return res.json(await toCourseDTO(course));
-  } catch (error) {
-    console.error("Error getting course:", error);
-    return res.status(500).json({
-      message: "Server Error",
-    });
-  }
-};
-
-// -------------------------
-// UPDATE COURSE
-// -------------------------
+// PATCH /courses/:id
 exports.updateCourse = async (req, res) => {
-  const userId = req.user.id;
-  const courseId = req.params.id;
+  const allowedFields = ["title", "instructor", "term", "year", "progress", "status"];
 
   try {
-    const course = await Course.findOne({
-      _id: courseId,
-      userId,
-    });
-
-    if (!course) {
-      return res.status(404).json({
-        message: "Course not found",
-      });
-    }
-
-    const updates = {};
-
-    const allowedFields = [
-      "title",
-      "instructor",
-      "term",
-      "year",
-      "progress",
-      "status",
-    ];
-
-    allowedFields.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        updates[field] = req.body[field];
-      }
-    });
-
-    const updatedCourse = await Course.findByIdAndUpdate(
-      courseId,
-      updates,
-      {
-        new: true,
-        runValidators: true,
-      }
+    const updates = Object.fromEntries(
+      allowedFields
+        .filter((field) => req.body[field] !== undefined)
+        .map((field) => [field, req.body[field]])
     );
 
-    return res.json(await toCourseDTO(updatedCourse));
+    const updated = await Course.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id },
+      updates,
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) return res.status(404).json({ message: "Course not found" });
+
+    const [courseDTO] = await coursesWithTaskCount({ _id: updated._id });
+    return res.json(courseDTO);
   } catch (error) {
     console.error("Error updating course:", error);
-    return res.status(500).json({
-      message: "Server Error",
-    });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
-// -------------------------
-// DELETE COURSE
-// -------------------------
+// DELETE /courses/:id
 exports.deleteCourse = async (req, res) => {
   try {
-    const deletedCourse = await Course.findOneAndDelete({
+    const deleted = await Course.findOneAndDelete({
       _id: req.params.id,
       userId: req.user.id,
     });
 
-    if (!deletedCourse) {
-      return res.status(404).json({
-        message: "Course not found",
-      });
-    }
+    if (!deleted) return res.status(404).json({ message: "Course not found" });
 
-    return res.json({
-      message: "Course deleted successfully",
-    });
+    return res.json({ message: "Course deleted successfully" });
   } catch (error) {
     console.error("Error deleting course:", error);
-    return res.status(500).json({
-      message: "Server Error",
-    });
+    return res.status(500).json({ message: "Server error" });
   }
 };

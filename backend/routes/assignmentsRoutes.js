@@ -1,6 +1,4 @@
 const express = require("express");
-const { protect } = require("../middleware/authMiddleware");
-
 const {
   addAssignment,
   getAssignments,
@@ -9,21 +7,17 @@ const {
   deleteAssignment,
   submitAssignment,
 } = require("../controllers/assignmentController");
+const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-/**
- * CORE CRUD (matches frontend)
- */
-router.get("/", protect, getAssignments);
-router.get("/:id", protect, getAssignment);
-router.post("/", protect, addAssignment);
-router.patch("/:id", protect, updateAssignment);
-router.delete("/:id", protect, deleteAssignment);
+router.use(protect);
 
-/**
- * SUBMISSION FLOW (frontend feature)
- */
-router.post("/:id/submit", protect, submitAssignment);
+router.get("/", getAssignments);
+router.get("/:id", getAssignment);
+router.post("/", addAssignment);
+router.patch("/:id", updateAssignment);
+router.delete("/:id", deleteAssignment);
+router.post("/:id/submit", submitAssignment);
 
 module.exports = router;
