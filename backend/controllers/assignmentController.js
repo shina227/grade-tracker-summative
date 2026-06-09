@@ -1,37 +1,26 @@
 const Assignment = require("../models/Assignment");
 const Course = require("../models/Course");
 
-// HELPERS
-
-const computeStatus = (assignment) => {
-  if (["submitted", "graded"].includes(assignment.status)) {
-    return assignment.status;
-  }
-
-  const daysUntilDue =
-    (new Date(assignment.dueDate) - Date.now()) / (1000 * 60 * 60 * 24);
-
-  if (daysUntilDue < 0) return "overdue";
-  if (daysUntilDue < 1) return "due_tomorrow";
-  if (daysUntilDue < 3) return "due_soon";
-  return "upcoming";
-};
+// ─── DTO ──────────────────────────────────────────────────────────────────────
 
 const toAssignmentDTO = (assignment) => ({
   id: assignment._id.toString(),
   title: assignment.title,
-  courseId: assignment.courseId?._id?.toString() ?? assignment.courseId.toString(),
-  courseName: assignment.courseId?.title ?? "Unknown",
+  courseId: assignment.courseId?._id?.toString() ?? assignment.courseId?.toString(),
+  courseName: assignment.courseId?.title ?? "Unknown Course",
   dueDate: assignment.dueDate.toISOString(),
-  status: computeStatus(assignment),
+  status: assignment.status,
 });
+
+// ─── Queries ──────────────────────────────────────────────────────────────────
 
 // GET /assignments
 exports.getAssignments = async (req, res) => {
   try {
     const assignments = await Assignment.find({ userId: req.user.id })
       .populate("courseId", "title")
-      .sort({ dueDate: 1 });
+      .sort({ dueDate: 1 })
+      .lean();
 
     return res.json(assignments.map(toAssignmentDTO));
   } catch (error) {
@@ -59,6 +48,8 @@ exports.getAssignment = async (req, res) => {
   }
 };
 
+// ─── Mutations ────────────────────────────────────────────────────────────────
+
 // POST /assignments
 exports.addAssignment = async (req, res) => {
   try {
@@ -70,8 +61,8 @@ exports.addAssignment = async (req, res) => {
       });
     }
 
-    // Ensure the course belongs to this user
     const course = await Course.findOne({ _id: courseId, userId: req.user.id });
+
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
@@ -82,9 +73,9 @@ exports.addAssignment = async (req, res) => {
       title,
       description: description ?? "",
       dueDate,
+      status: "upcoming",
     });
 
-    // Populate in one step after creation
     await assignment.populate("courseId", "title");
 
     return res.status(201).json(toAssignmentDTO(assignment));
@@ -105,17 +96,17 @@ exports.updateAssignment = async (req, res) => {
         .map((field) => [field, req.body[field]])
     );
 
-    const updated = await Assignment.findOneAndUpdate(
+    const assignment = await Assignment.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
       updates,
       { new: true, runValidators: true }
     ).populate("courseId", "title");
 
-    if (!updated) {
+    if (!assignment) {
       return res.status(404).json({ message: "Assignment not found" });
     }
 
-    return res.json(toAssignmentDTO(updated));
+    return res.json(toAssignmentDTO(assignment));
   } catch (error) {
     console.error("Error updating assignment:", error);
     return res.status(500).json({ message: "Server error" });
@@ -125,7 +116,7 @@ exports.updateAssignment = async (req, res) => {
 // POST /assignments/:id/submit
 exports.submitAssignment = async (req, res) => {
   try {
-    const updated = await Assignment.findOneAndUpdate(
+    const assignment = await Assignment.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
       {
         submissionContent: req.body.content ?? "",
@@ -133,10 +124,10 @@ exports.submitAssignment = async (req, res) => {
         submittedAt: new Date(),
         status: "submitted",
       },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
-    if (!updated) {
+    if (!assignment) {
       return res.status(404).json({ message: "Assignment not found" });
     }
 
@@ -150,12 +141,12 @@ exports.submitAssignment = async (req, res) => {
 // DELETE /assignments/:id
 exports.deleteAssignment = async (req, res) => {
   try {
-    const deleted = await Assignment.findOneAndDelete({
+    const assignment = await Assignment.findOneAndDelete({
       _id: req.params.id,
       userId: req.user.id,
     });
 
-    if (!deleted) {
+    if (!assignment) {
       return res.status(404).json({ message: "Assignment not found" });
     }
 
