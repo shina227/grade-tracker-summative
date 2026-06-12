@@ -4,12 +4,12 @@ const Course = require("../models/Course");
 // ─── DTO ──────────────────────────────────────────────────────────────────────
 
 const toAssignmentDTO = (assignment) => ({
-  id: assignment._id.toString(),
-  title: assignment.title,
-  courseId: assignment.courseId?._id?.toString() ?? assignment.courseId?.toString(),
+  id: assignment._id?.toString() || "",
+  title: assignment.title || "Untitled",
+  courseId: assignment.courseId?._id?.toString() ?? assignment.courseId?.toString() ?? null,
   courseName: assignment.courseId?.title ?? "Unknown Course",
-  dueDate: assignment.dueDate.toISOString(),
-  status: assignment.status,
+  dueDate: assignment.dueDate ? new Date(assignment.dueDate).toISOString() : null,
+  status: assignment.status || "upcoming",
 });
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
