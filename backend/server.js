@@ -43,7 +43,7 @@ app.use(
   })
 );
 
-app.options("*", cors());
+app.options("/(.*)", cors());
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
