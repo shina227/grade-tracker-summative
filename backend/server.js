@@ -30,7 +30,6 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow server-to-server / curl / mobile apps
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
@@ -39,10 +38,12 @@ app.use(
 
       return callback(new Error(`CORS blocked for origin: ${origin}`));
     },
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+app.options("*", cors());
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
