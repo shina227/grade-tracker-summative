@@ -8,8 +8,14 @@ const toAssignmentDTO = (assignment) => ({
   title: assignment.title || "Untitled",
   courseId: assignment.courseId?._id?.toString() ?? assignment.courseId?.toString() ?? null,
   courseName: assignment.courseId?.title ?? "Unknown Course",
+  instructor: assignment.instructor || "",
   dueDate: assignment.dueDate ? new Date(assignment.dueDate).toISOString() : null,
   status: assignment.status || "upcoming",
+  points: assignment.points || 0,
+  submissionType: assignment.submissionType || "",
+  description: assignment.description || "",
+  gradingRubric: assignment.gradingRubric || [],
+  reminderNote: assignment.reminderNote || "",
 });
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
@@ -53,7 +59,17 @@ exports.getAssignment = async (req, res) => {
 // POST /assignments
 exports.addAssignment = async (req, res) => {
   try {
-    const { courseId, title, description, dueDate } = req.body;
+    const {
+      courseId,
+      title,
+      description,
+      dueDate,
+      instructor,
+      points,
+      submissionType,
+      gradingRubric,
+      reminderNote,
+    } = req.body;
 
     if (!courseId || !title || !dueDate) {
       return res.status(400).json({
@@ -72,6 +88,11 @@ exports.addAssignment = async (req, res) => {
       courseId,
       title,
       description: description ?? "",
+      instructor: instructor ?? "",
+      points: points ?? 0,
+      submissionType: submissionType ?? "",
+      gradingRubric: gradingRubric ?? [],
+      reminderNote: reminderNote ?? "",
       dueDate,
       status: "upcoming",
     });
@@ -87,7 +108,17 @@ exports.addAssignment = async (req, res) => {
 
 // PATCH /assignments/:id
 exports.updateAssignment = async (req, res) => {
-  const allowedFields = ["title", "description", "dueDate"];
+  const allowedFields = [
+    "title",
+    "description",
+    "dueDate",
+    "instructor",
+    "points",
+    "submissionType",
+    "gradingRubric",
+    "reminderNote",
+    "status"
+  ];
 
   try {
     const updates = Object.fromEntries(
