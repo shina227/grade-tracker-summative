@@ -8,10 +8,15 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, required: true },
     role: {
       type: String,
-      enum: ["student", "teacher"],
+      enum: ["student", "teacher", "admin"],
       default: "student",
     },
     profileImageUrl: { type: String, default: null },
+    studentId: { type: String, default: null },
+    yearOfStudy: { type: String, default: null },
+    isActive: { type: Boolean, default: true },
+    resetPasswordToken: { type: String, default: null },
+    resetPasswordExpiry: { type: Date, default: null },
   },
   { timestamps: true }
 );

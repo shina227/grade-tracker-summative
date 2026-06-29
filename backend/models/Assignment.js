@@ -10,11 +10,6 @@ const RubricCriterionSchema = new mongoose.Schema(
 
 const AssignmentSchema = new mongoose.Schema(
   {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
@@ -24,20 +19,16 @@ const AssignmentSchema = new mongoose.Schema(
     description: { type: String, default: "" },
     instructor: { type: String, default: "" },
     points: { type: Number, default: 0 },
-    submissionType: { type: String, default: "" },
+    submissionType: { type: String, default: "file_upload" },
     gradingRubric: { type: [RubricCriterionSchema], default: [] },
     reminderNote: { type: String, default: "" },
     dueDate: { type: Date, required: true },
 
     status: {
       type: String,
-      enum: ["upcoming", "overdue", "submitted", "graded"],
+      enum: ["upcoming", "overdue", "closed"],
       default: "upcoming",
     },
-
-    submissionContent: { type: String, default: "" },
-    fileUrl: { type: String, default: "" },
-    submittedAt: Date,
   },
   { timestamps: true }
 );
