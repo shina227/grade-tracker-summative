@@ -5,9 +5,6 @@ const cors = require("cors");
 const path = require("path");
 const bcrypt = require("bcrypt");
 
-import swaggerUi from 'swagger-ui-express';
-import { swaggerSpec } from './config/swagger.js';
-
 const connectDB = require("./config/db");
 const User = require("./models/User");
 
@@ -27,8 +24,6 @@ const app = express();
 // Body Parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Allowed Origins
 const allowedOrigins = [
