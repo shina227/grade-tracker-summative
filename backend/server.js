@@ -6,9 +6,14 @@ const path = require("path");
 const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
+const usersRoutes = require("./routes/usersRoutes");
+const uploadsRoutes = require("./routes/uploadsRoutes");
 const coursesRoutes = require("./routes/coursesRoutes");
+const lessonsRoutes = require("./routes/lessonsRoutes");
 const assignmentsRoutes = require("./routes/assignmentsRoutes");
 const gradesRoutes = require("./routes/gradesRoutes");
+const notificationsRoutes = require("./routes/notificationsRoutes");
+const remindersRoutes = require("./routes/remindersRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
@@ -47,12 +52,18 @@ app.options(/.*/, cors());
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/users", usersRoutes);
+app.use("/api/v1/uploads", uploadsRoutes);
 app.use("/api/v1/courses", coursesRoutes);
+app.use("/api/v1/lessons", lessonsRoutes);
 app.use("/api/v1/assignments", assignmentsRoutes);
 app.use("/api/v1/grades", gradesRoutes);
+app.use("/api/v1/notifications", notificationsRoutes);
+app.use("/api/v1/reminders", remindersRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 
 // Static Files
+// Serve all uploaded files (all context subdirectories) as static assets
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Health Check (useful for Render debugging)

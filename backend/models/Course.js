@@ -2,17 +2,19 @@ const mongoose = require("mongoose");
 
 const CourseSchema = new mongoose.Schema(
   {
-    userId: {
+    instructorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
     title: { type: String, required: true },
-    instructor: { type: String, default: "Unknown" },
-    term: String,
-    year: Number,
-    progress: { type: Number, default: 0, min: 0, max: 100 },
-    status: { type: String, enum: ["active", "completed"], default: "active" },
+    term: { type: String, default: null },
+    year: { type: Number, default: null },
+    status: {
+      type: String,
+      enum: ["active", "completed", "archived"],
+      default: "active",
+    },
   },
   { timestamps: true }
 );

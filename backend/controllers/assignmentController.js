@@ -1,189 +1,294 @@
+const mongoose = require("mongoose");
 const Assignment = require("../models/Assignment");
 const Course = require("../models/Course");
+const Enrollment = require("../models/Enrollment");
 
-// ─── DTO ──────────────────────────────────────────────────────────────────────
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
 const toAssignmentDTO = (assignment) => ({
   id: assignment._id?.toString() || "",
-  title: assignment.title || "Untitled",
   courseId: assignment.courseId?._id?.toString() ?? assignment.courseId?.toString() ?? null,
   courseName: assignment.courseId?.title ?? "Unknown Course",
-  instructor: assignment.instructor || "",
+  instructor: assignment.instructor || assignment.courseId?.instructorId?.fullName || "",
+  title: assignment.title || "Untitled",
+  description: assignment.description || "",
   dueDate: assignment.dueDate ? new Date(assignment.dueDate).toISOString() : null,
   status: assignment.status || "upcoming",
   points: assignment.points || 0,
-  submissionType: assignment.submissionType || "",
-  description: assignment.description || "",
+  submissionType: assignment.submissionType || "file_upload",
   gradingRubric: assignment.gradingRubric || [],
   reminderNote: assignment.reminderNote || "",
 });
 
-// ─── Queries ──────────────────────────────────────────────────────────────────
+const resolveCourseAccess = async (req, res, courseId) => {
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    res.status(404).json({ message: "Course not found.", code: "NOT_FOUND" });
+    return null;
+  }
 
-// GET /assignments
+  const course = await Course.findById(courseId).populate("instructorId", "fullName");
+  if (!course) {
+    res.status(404).json({ message: "Course not found.", code: "NOT_FOUND" });
+    return null;
+  }
+
+  const { role, _id: userId } = req.user;
+  if (role === "admin") return course;
+
+  if (role === "teacher") {
+    if (course.instructorId._id.toString() !== userId.toString()) {
+      res.status(403).json({ message: "You do not have access to this course.", code: "FORBIDDEN" });
+      return null;
+    }
+    return course;
+  }
+
+  if (role === "student") {
+    const enrollment = await Enrollment.findOne({ courseId, studentId: userId });
+    if (!enrollment) {
+      res.status(403).json({ message: "You are not enrolled in this course.", code: "FORBIDDEN" });
+      return null;
+    }
+    return course;
+  }
+
+  res.status(403).json({ message: "Access denied.", code: "FORBIDDEN" });
+  return null;
+};
+
+// ─── GET /v1/courses/:courseId/assignments ───────────────────────────────────
+
+exports.getCourseAssignments = async (req, res) => {
+  try {
+    const course = await resolveCourseAccess(req, res, req.params.courseId);
+    if (!course) return;
+
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+
+    const filter = { courseId: course._id };
+    if (req.query.status) filter.status = req.query.status;
+
+    const [assignments, total] = await Promise.all([
+      Assignment.find(filter)
+        .populate({ path: "courseId", select: "title instructorId", populate: { path: "instructorId", select: "fullName" } })
+        .sort({ dueDate: 1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Assignment.countDocuments(filter),
+    ]);
+
+    return res.status(200).json({
+      data: assignments.map(toAssignmentDTO),
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    });
+  } catch (err) {
+    console.error("Error in getCourseAssignments:", err);
+    return res.status(500).json({ message: "Internal server error.", code: "INTERNAL_ERROR" });
+  }
+};
+
+// ─── GET /v1/assignments ──────────────────────────────────────────────────────
+
 exports.getAssignments = async (req, res) => {
   try {
-    const assignments = await Assignment.find({ userId: req.user.id })
-      .populate("courseId", "title")
-      .sort({ dueDate: 1 })
-      .lean();
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
 
-    return res.json(assignments.map(toAssignmentDTO));
-  } catch (error) {
-    console.error("Error fetching assignments:", error);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
+    const { role, _id: userId } = req.user;
+    let courseIds = null;
 
-// GET /assignments/:id
-exports.getAssignment = async (req, res) => {
-  try {
-    const assignment = await Assignment.findOne({
-      _id: req.params.id,
-      userId: req.user.id,
-    }).populate("courseId", "title");
-
-    if (!assignment) {
-      return res.status(404).json({ message: "Assignment not found" });
+    if (req.query.courseId) {
+      if (!mongoose.Types.ObjectId.isValid(req.query.courseId)) {
+        return res.status(404).json({ message: "Course not found.", code: "NOT_FOUND" });
+      }
+      courseIds = [req.query.courseId];
+    } else {
+      if (role === "student") {
+        const enrollments = await Enrollment.find({ studentId: userId }).select("courseId").lean();
+        courseIds = enrollments.map((e) => e.courseId);
+      } else if (role === "teacher") {
+        const courses = await Course.find({ instructorId: userId }).select("_id").lean();
+        courseIds = courses.map((c) => c._id);
+      }
     }
 
-    return res.json(toAssignmentDTO(assignment));
-  } catch (error) {
-    console.error("Error fetching assignment:", error);
-    return res.status(500).json({ message: "Server error" });
+    const filter = {};
+    if (courseIds !== null) filter.courseId = { $in: courseIds };
+    if (req.query.status) filter.status = req.query.status;
+
+    const [assignments, total] = await Promise.all([
+      Assignment.find(filter)
+        .populate({ path: "courseId", select: "title instructorId", populate: { path: "instructorId", select: "fullName" } })
+        .sort({ dueDate: 1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Assignment.countDocuments(filter),
+    ]);
+
+    return res.status(200).json({
+      data: assignments.map(toAssignmentDTO),
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    });
+  } catch (err) {
+    console.error("Error in getAssignments:", err);
+    return res.status(500).json({ message: "Internal server error.", code: "INTERNAL_ERROR" });
   }
 };
 
-// ─── Mutations ────────────────────────────────────────────────────────────────
+// ─── POST /v1/courses/:courseId/assignments ──────────────────────────────────
 
-// POST /assignments
-exports.addAssignment = async (req, res) => {
+exports.createAssignment = async (req, res) => {
   try {
-    const {
-      courseId,
-      title,
-      description,
-      dueDate,
-      instructor,
-      points,
-      submissionType,
-      gradingRubric,
-      reminderNote,
-    } = req.body;
+    const course = await resolveCourseAccess(req, res, req.params.courseId);
+    if (!course) return;
 
-    if (!courseId || !title || !dueDate) {
+    if (req.user.role === "student") {
+      return res.status(403).json({ message: "Students cannot create assignments.", code: "FORBIDDEN" });
+    }
+
+    const { title, description, dueDate, points, submissionType, gradingRubric, reminderNote } = req.body;
+
+    if (!title || !dueDate) {
       return res.status(400).json({
-        message: "courseId, title, and dueDate are required",
+        message: "Validation failed.",
+        code: "VALIDATION_ERROR",
+        fields: {
+          ...(!title && { title: "Title is required." }),
+          ...(!dueDate && { dueDate: "Due date is required." }),
+        },
       });
     }
 
-    const course = await Course.findOne({ _id: courseId, userId: req.user.id });
-
-    if (!course) {
-      return res.status(404).json({ message: "Course not found" });
-    }
-
     const assignment = await Assignment.create({
-      userId: req.user.id,
-      courseId,
+      courseId: course._id,
       title,
       description: description ?? "",
-      instructor: instructor ?? "",
-      points: points ?? 0,
-      submissionType: submissionType ?? "",
+      instructor: course.instructorId?.fullName ?? "",
+      dueDate,
+      points: points ?? 100,
+      submissionType: submissionType ?? "file_upload",
       gradingRubric: gradingRubric ?? [],
       reminderNote: reminderNote ?? "",
-      dueDate,
       status: "upcoming",
     });
 
-    await assignment.populate("courseId", "title");
+    await assignment.populate({ path: "courseId", select: "title instructorId", populate: { path: "instructorId", select: "fullName" } });
 
     return res.status(201).json(toAssignmentDTO(assignment));
-  } catch (error) {
-    console.error("Error creating assignment:", error);
-    return res.status(500).json({ message: "Server error" });
+  } catch (err) {
+    console.error("Error in createAssignment:", err);
+    return res.status(500).json({ message: "Internal server error.", code: "INTERNAL_ERROR" });
   }
 };
 
-// PATCH /assignments/:id
-exports.updateAssignment = async (req, res) => {
-  const allowedFields = [
-    "title",
-    "description",
-    "dueDate",
-    "instructor",
-    "points",
-    "submissionType",
-    "gradingRubric",
-    "reminderNote",
-    "status"
-  ];
+// ─── GET /v1/assignments/:assignmentId ───────────────────────────────────────
 
+exports.getAssignment = async (req, res) => {
   try {
-    const updates = Object.fromEntries(
-      allowedFields
-        .filter((field) => req.body[field] !== undefined)
-        .map((field) => [field, req.body[field]])
-    );
-
-    const assignment = await Assignment.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.id },
-      updates,
-      { new: true, runValidators: true }
-    ).populate("courseId", "title");
-
-    if (!assignment) {
-      return res.status(404).json({ message: "Assignment not found" });
+    const { assignmentId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(assignmentId)) {
+      return res.status(404).json({ message: "Assignment not found.", code: "NOT_FOUND" });
     }
 
-    return res.json(toAssignmentDTO(assignment));
-  } catch (error) {
-    console.error("Error updating assignment:", error);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
-
-// POST /assignments/:id/submit
-exports.submitAssignment = async (req, res) => {
-  try {
-    const assignment = await Assignment.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.id },
-      {
-        submissionContent: req.body.content ?? "",
-        fileUrl: req.body.fileUrl ?? "",
-        submittedAt: new Date(),
-        status: "submitted",
-      },
-      { new: true, runValidators: true }
-    );
-
-    if (!assignment) {
-      return res.status(404).json({ message: "Assignment not found" });
-    }
-
-    return res.status(204).send();
-  } catch (error) {
-    console.error("Error submitting assignment:", error);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
-
-// DELETE /assignments/:id
-exports.deleteAssignment = async (req, res) => {
-  try {
-    const assignment = await Assignment.findOneAndDelete({
-      _id: req.params.id,
-      userId: req.user.id,
+    const assignment = await Assignment.findById(assignmentId).populate({
+      path: "courseId",
+      select: "title instructorId",
+      populate: { path: "instructorId", select: "fullName" },
     });
 
     if (!assignment) {
-      return res.status(404).json({ message: "Assignment not found" });
+      return res.status(404).json({ message: "Assignment not found.", code: "NOT_FOUND" });
     }
 
-    return res.json({ message: "Assignment deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting assignment:", error);
-    return res.status(500).json({ message: "Server error" });
+    // Check course access
+    const courseAccess = await resolveCourseAccess(req, res, assignment.courseId._id);
+    if (!courseAccess) return;
+
+    return res.status(200).json(toAssignmentDTO(assignment));
+  } catch (err) {
+    console.error("Error in getAssignment:", err);
+    return res.status(500).json({ message: "Internal server error.", code: "INTERNAL_ERROR" });
+  }
+};
+
+// ─── PATCH /v1/assignments/:assignmentId ─────────────────────────────────────
+
+exports.updateAssignment = async (req, res) => {
+  try {
+    const { assignmentId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(assignmentId)) {
+      return res.status(404).json({ message: "Assignment not found.", code: "NOT_FOUND" });
+    }
+
+    const assignment = await Assignment.findById(assignmentId);
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found.", code: "NOT_FOUND" });
+    }
+
+    const course = await Course.findById(assignment.courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found.", code: "NOT_FOUND" });
+    }
+
+    if (req.user.role === "teacher" && course.instructorId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Forbidden", code: "FORBIDDEN" });
+    }
+
+    const ALLOWED = ["title", "description", "dueDate", "points", "submissionType", "gradingRubric", "reminderNote", "status"];
+    const updates = {};
+    for (const field of ALLOWED) {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
+    }
+
+    const updated = await Assignment.findByIdAndUpdate(assignmentId, updates, {
+      new: true,
+      runValidators: true,
+    }).populate({ path: "courseId", select: "title instructorId", populate: { path: "instructorId", select: "fullName" } });
+
+    return res.status(200).json(toAssignmentDTO(updated));
+  } catch (err) {
+    console.error("Error in updateAssignment:", err);
+    return res.status(500).json({ message: "Internal server error.", code: "INTERNAL_ERROR" });
+  }
+};
+
+// ─── DELETE /v1/assignments/:assignmentId ────────────────────────────────────
+
+exports.deleteAssignment = async (req, res) => {
+  try {
+    const { assignmentId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(assignmentId)) {
+      return res.status(404).json({ message: "Assignment not found.", code: "NOT_FOUND" });
+    }
+
+    const assignment = await Assignment.findById(assignmentId);
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found.", code: "NOT_FOUND" });
+    }
+
+    const course = await Course.findById(assignment.courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found.", code: "NOT_FOUND" });
+    }
+
+    if (req.user.role === "teacher" && course.instructorId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Forbidden", code: "FORBIDDEN" });
+    }
+
+    const Submission = require("../models/Submission");
+    await Promise.all([
+      Assignment.findByIdAndDelete(assignmentId),
+      Submission.deleteMany({ assignmentId }),
+    ]);
+
+    return res.status(204).send();
+  } catch (err) {
+    console.error("Error in deleteAssignment:", err);
+    return res.status(500).json({ message: "Internal server error.", code: "INTERNAL_ERROR" });
   }
 };
