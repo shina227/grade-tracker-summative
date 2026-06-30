@@ -86,7 +86,7 @@ async function seedAdmin() {
     await User.create({
       fullName: process.env.DEFAULT_ADMIN_NAME,
       email: process.env.DEFAULT_ADMIN_EMAIL,
-      password: hashedPassword,
+      password: process.env.DEFAULT_ADMIN_PASSWORD,
       role: "admin",
     });
 
